@@ -10,7 +10,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { isSignedIn } from "@/lib/auth-placeholder"
+import { SignOutButton } from "@/components/auth/sign-out-button"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation";
 
@@ -23,7 +23,7 @@ const signedInLinks = [
 
 const guestLinks = [{ href: "/books", label: "Catalog" }]
 
-export default function SiteHeader() {
+export default function SiteHeader({ isSignedIn }: { isSignedIn: boolean }) {
   const pathname = usePathname()  
 
   function isActive(href: string) {
@@ -61,13 +61,15 @@ export default function SiteHeader() {
             </NavigationMenuList>
           </NavigationMenu>
 
-          {!isSignedIn && (
+          {!isSignedIn ? (
             <Link
               href="/sign-in"
               className={cn(buttonVariants({ size: "lg" }))}
             >
               Sign in
             </Link>
+          ) : (
+            <SignOutButton />
           )}
         </div>
       </div>
