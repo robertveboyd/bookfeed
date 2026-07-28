@@ -4,78 +4,78 @@ import { useActionState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import {
   register,
   type RegisterState,
 } from "@/lib/users/actions/register"
-import { cn } from "@/lib/utils"
 
-const initialState: RegisterState = { status: "idle" }
-
-const inputClassName = cn(
-  "border-input bg-background w-full rounded-lg border px-3 py-2 text-sm",
-  "outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
-)
+const initialState: RegisterState = {
+  errors: {},
+  message: null,
+}
 
 export function RegisterForm() {
-  const [state, formAction, pending] = useActionState(
-    register,
-    initialState,
-  )
+  const [state, formAction, pending] = useActionState(register, initialState)
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="space-y-2">
-        <label htmlFor="username" className="text-sm font-medium">
-          Username
-        </label>
-        <input
-          id="username"
-          name="username"
-          type="text"
-          autoComplete="username"
-          required
-          className={inputClassName}
-        />
-      </div>
+    <form action={formAction} noValidate>
+      <FieldGroup>
+        <Field data-invalid={!!state.errors?.username || undefined}>
+          <FieldLabel htmlFor="username">Username</FieldLabel>
+          <Input
+            id="username"
+            name="username"
+            type="text"
+            autoComplete="username"
+            required
+            aria-invalid={!!state.errors?.username || undefined}
+          />
+          <FieldDescription>
+            Letters, numbers, _ and - (3–32 characters)
+          </FieldDescription>
+          <FieldError>{state.errors?.username?.[0]}</FieldError>
+        </Field>
 
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          className={inputClassName}
-        />
-      </div>
+        <Field data-invalid={!!state.errors?.email || undefined}>
+          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            aria-invalid={!!state.errors?.email || undefined}
+          />
+          <FieldError>{state.errors?.email?.[0]}</FieldError>
+        </Field>
 
-      <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">
-          Password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={8}
-          className={inputClassName}
-        />
-      </div>
+        <Field data-invalid={!!state.errors?.password || undefined}>
+          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            aria-invalid={!!state.errors?.password || undefined}
+          />
+          <FieldError>{state.errors?.password?.[0]}</FieldError>
+        </Field>
 
-      {state.status === "error" && (
-        <p className="text-destructive text-sm" role="alert">
-          {state.error}
-        </p>
-      )}
+        {state.message && <FieldError>{state.message}</FieldError>}
 
-      <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Creating account…" : "Create account"}
-      </Button>
+        <Button type="submit" disabled={pending} className="w-full">
+          {pending ? "Creating account…" : "Create account"}
+        </Button>
+      </FieldGroup>
     </form>
   )
 }

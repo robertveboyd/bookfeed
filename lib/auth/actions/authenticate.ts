@@ -1,47 +1,66 @@
 "use server"
 
-import { AuthError } from "next-auth";
+import { AuthError } from "next-auth"
+import { z } from "zod"
 
-import { signIn } from "@/lib/auth";
-import { safeCallbackUrl } from "@/lib/auth/util/callback-url"
-import { AuthErrorType } from "../errors/types";
+import { signIn } from "@/lib/auth"
+import { AuthErrorType } from "@/lib/auth/errors/types"
+import { clearReturnTo, getReturnTo } from "@/lib/auth/util/return-to"
+import { normalizeEmail } from "@/lib/users/util/normalize"
 
-type AuthenticateIdleState = { status: "idle" }
-type AuthenticateErrorState = { status: "error", error: string }
+export type AuthenticateState = {
+  errors?: {
+    email?: string[]
+    password?: string[]
+  }
+  message?: string | null
+}
 
-export type AuthenticateState = 
- | AuthenticateIdleState
- | AuthenticateErrorState
+const signInSchema = z.object({
+  email: z.email({ message: "Enter a valid email" }),
+  password: z.string().min(1, { message: "Enter your password" }),
+})
 
- export type AuthenticateResult = Exclude<AuthenticateState, AuthenticateIdleState>;
+export async function authenticate(
+  _prevState: AuthenticateState,
+  formData: FormData,
+): Promise<AuthenticateState> {
+  const email = normalizeEmail(String(formData.get("email") ?? ""))
+  const password = String(formData.get("password") ?? "")
 
- export async function authenticate(
-    _prevState: AuthenticateState,
-    formData: FormData,
- ): Promise<AuthenticateResult> {
-    try {
-        await signIn("credentials", {
-            email: formData.get("email"),
-            password: formData.get("password"),
-            redirectTo: safeCallbackUrl(formData.get("callbackUrl"), "/"),
-        })
-    } catch (error) {
-        if (error instanceof AuthError) {
-            if (error.type === AuthErrorType.Credentials) {
-              return {
-                status: "error",
-                error: "Invalid email or password.",
-              }
-            }
-            return {
-              status: "error",
-              error: "Something went wrong. Please try again.",
-            }
-          }
-          throw error 
-    }
+  const parsed = signInSchema.safeParse({ email, password })
+  if (!parsed.success) {
     return {
-        status: "error",
-        error: "Something went wrong. Please try again.",
+      errors: z.flattenError(parsed.error).fieldErrors,
+      message: null,
     }
- }
+  }
+
+  const redirectTo = await getReturnTo("/")
+
+  try {
+    await signIn("credentials", {
+      email: parsed.data.email,
+      password: parsed.data.password,
+      redirectTo,
+    })
+  } catch (error) {
+    if (error instanceof AuthError) {
+      if (error.type === AuthErrorType.Credentials) {
+        return {
+          message: "Invalid email or password.",
+        }
+      }
+      return {
+        message: "Something went wrong. Please try again.",
+      }
+    }
+
+    await clearReturnTo()
+    throw error
+  }
+
+  return {
+    message: "Something went wrong. Please try again.",
+  }
+}

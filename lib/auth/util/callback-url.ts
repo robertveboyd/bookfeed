@@ -21,9 +21,3 @@ export function safeCallbackUrl(value: unknown, fallback = "/"): string {
 
     return path;
 }
-
-export function signInHref(callbackUrl: unknown = "/"): string {
-    const safe = safeCallbackUrl(callbackUrl, "/")
-    if (safe === "/") return "/sign-in"
-    return `/sign-in?callbackUrl=${encodeURIComponent(safe)}`
-}

@@ -2,20 +2,12 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 import { SignInForm } from "@/components/auth/sign-in-form"
-import { safeCallbackUrl } from "@/lib/auth/util/callback-url"
 
 export const metadata: Metadata = {
   title: "Sign in",
 }
 
-export default async function Page({
-  searchParams,
-} : {
-  searchParams: Promise<{ callbackUrl?: string }>
-}) {
-  const { callbackUrl: rawCallbackUrl } = await searchParams
-  const callbackUrl = safeCallbackUrl(rawCallbackUrl, "/");
-
+export default async function Page() {
   return (
     <div className="mx-auto max-w-sm space-y-6">
       <div className="space-y-2">
@@ -27,7 +19,7 @@ export default async function Page({
         </p>
       </div>
 
-      <SignInForm callbackUrl={callbackUrl} />
+      <SignInForm />
 
       <p className="text-muted-foreground text-sm">
         Or{" "}
