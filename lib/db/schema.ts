@@ -1,8 +1,16 @@
-import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core"
+import {
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  integer,
+  index,
+  primaryKey,
+} from "drizzle-orm/pg-core"
 
 export const UsersUnique = {
-    email: "users_email_unique",
-    username: "users_username_unique",
+  email: "users_email_unique",
+  username: "users_username_unique",
 } as const
 
 export const users = pgTable("users", {
@@ -11,7 +19,10 @@ export const users = pgTable("users", {
   // Auth.js-compatible fields
   name: text("name"),
   email: text("email").notNull().unique(UsersUnique.email),
-  emailVerified: timestamp("email_verified", { withTimezone: true, mode: "date" }),
+  emailVerified: timestamp("email_verified", {
+    withTimezone: true,
+    mode: "date",
+  }),
   image: text("image"),
 
   // Bookfeed auth + profile
@@ -19,6 +30,77 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(UsersUnique.username),
   bio: text("bio"),
 
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 })
+
+export const AuthorsUnique = {
+  openLibraryAuthorKey: "authors_open_library_author_key_unique",
+} as const
+
+export const authors = pgTable(
+  "authors",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    openLibraryAuthorKey: text("open_library_author_key").unique(
+      AuthorsUnique.openLibraryAuthorKey,
+    ),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("authors_name_idx").on(t.name)],
+)
+
+export const BooksUnique = {
+  openLibraryWorkKey: "books_open_library_work_key_unique",
+  isbn13: "books_isbn13_unique",
+} as const
+
+export const books = pgTable(
+  "books",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    openLibraryWorkKey: text("open_library_work_key")
+      .notNull()
+      .unique(BooksUnique.openLibraryWorkKey),
+    title: text("title").notNull(),
+    description: text("description"),
+    isbn13: text("isbn13").unique(BooksUnique.isbn13),
+    isbn10: text("isbn10"),
+    coverImageUrl: text("cover_image_url").notNull(),
+    publishYear: integer("publish_year"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("books_title_idx").on(t.title)],
+)
+
+export const bookAuthors = pgTable(
+  "book_authors",
+  {
+    bookId: uuid("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => authors.id, { onDelete: "cascade" }),
+    position: integer("position").notNull().default(0),
+  },
+  (t) => [
+    primaryKey({ columns: [t.bookId, t.authorId] }),
+    index("book_authors_author_id_idx").on(t.authorId),
+  ],
+)

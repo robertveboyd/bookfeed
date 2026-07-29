@@ -11,6 +11,7 @@ import { db } from "@/lib/db"
 import { users, UsersUnique } from "@/lib/db/schema"
 import { normalizeEmail, normalizeUsername } from "@/lib/users/util/normalize"
 import { hashPassword } from "@/lib/users/util/password"
+import { registerSchema } from "@/lib/users/schema"
 
 export type RegisterState = {
   errors?: {
@@ -20,20 +21,6 @@ export type RegisterState = {
   }
   message?: string | null
 }
-
-const registerSchema = z.object({
-  email: z.email({ message: "Enter a valid email" }),
-  username: z
-    .string()
-    .min(3, { message: "Username must be at least 3 characters" })
-    .max(32, { message: "Username must be at most 32 characters" })
-    .regex(/^[a-zA-Z0-9_-]+$/, {
-      message: "Username can only use letters, numbers, _ and -",
-    }),
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters",
-  }),
-})
 
 export async function register(
   _prevState: RegisterState,

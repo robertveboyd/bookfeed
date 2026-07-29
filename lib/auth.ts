@@ -1,17 +1,13 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import { z } from "zod"
 import { eq } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
 import { verifyPassword } from "@/lib/users/util/password"
 import { normalizeEmail } from "@/lib/users/util/normalize"
+import { signInSchema } from "@/lib/auth/schema"
 
-const signInSchema = z.object({
-  email: z.email({ message: "Enter a valid email" }),
-  password: z.string().min(1, { message: "Enter your password" }),
-})
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [

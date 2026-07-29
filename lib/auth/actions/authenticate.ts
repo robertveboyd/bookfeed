@@ -7,6 +7,7 @@ import { signIn } from "@/lib/auth"
 import { AuthErrorType } from "@/lib/auth/errors/types"
 import { clearReturnTo, getReturnTo } from "@/lib/auth/util/return-to"
 import { normalizeEmail } from "@/lib/users/util/normalize"
+import { signInSchema } from "@/lib/auth/schema"
 
 export type AuthenticateState = {
   errors?: {
@@ -15,11 +16,6 @@ export type AuthenticateState = {
   }
   message?: string | null
 }
-
-const signInSchema = z.object({
-  email: z.email({ message: "Enter a valid email" }),
-  password: z.string().min(1, { message: "Enter your password" }),
-})
 
 export async function authenticate(
   _prevState: AuthenticateState,
