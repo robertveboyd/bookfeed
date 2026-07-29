@@ -22,13 +22,6 @@ export default async function Page() {
       <SignInForm />
 
       <p className="text-muted-foreground text-sm">
-        Or{" "}
-        <Link href="/books" className="text-primary font-medium hover:underline">
-          browse the catalog
-        </Link>
-        .
-      </p>
-      <p className="text-muted-foreground text-sm">
         Don&apos;t have an account?{" "}
         <Link href="/register" className="text-primary font-medium hover:underline">
           Create one

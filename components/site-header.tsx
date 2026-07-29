@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
-import { buttonVariants } from "@/components/ui/button"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -11,33 +11,27 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { SignOutButton } from "@/components/auth/sign-out-button"
-import { cn } from "@/lib/utils"
-import { usePathname } from "next/navigation";
 
-const signedInLinks = [
+const links = [
   { href: "/", label: "Feed" },
   { href: "/books", label: "Catalog" },
   { href: "/library", label: "Library" },
   { href: "/profile", label: "Profile" },
 ]
 
-const guestLinks = [{ href: "/books", label: "Catalog" }]
-
-export default function SiteHeader({ isSignedIn }: { isSignedIn: boolean }) {
-  const pathname = usePathname()  
+export default function SiteHeader() {
+  const pathname = usePathname()
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/"
     return pathname === href || pathname.startsWith(`${href}/`)
   }
 
-  const links = isSignedIn ? signedInLinks : guestLinks
-
   return (
     <header className="border-b border-border">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
         <Link
-          href={isSignedIn ? "/" : "/sign-in"}
+          href="/"
           className="font-semibold tracking-tight text-foreground"
         >
           Bookfeed
@@ -61,16 +55,7 @@ export default function SiteHeader({ isSignedIn }: { isSignedIn: boolean }) {
             </NavigationMenuList>
           </NavigationMenu>
 
-          {!isSignedIn ? (
-            <Link
-              href="/sign-in"
-              className={cn(buttonVariants({ size: "lg" }))}
-            >
-              Sign in
-            </Link>
-          ) : (
-            <SignOutButton />
-          )}
+          <SignOutButton />
         </div>
       </div>
     </header>

@@ -1,10 +1,19 @@
-import { requireSession } from "@/lib/auth/util/session";
+import SiteHeader from "@/components/site-header"
+import { requireSession } from "@/lib/auth/util/session"
 
 export default async function Layout({
-    children
-} : {
-    children: React.ReactNode
+  children,
+}: {
+  children: React.ReactNode
 }) {
-    await requireSession();
-    return children;
+  await requireSession()
+
+  return (
+    <>
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+        {children}
+      </main>
+    </>
+  )
 }

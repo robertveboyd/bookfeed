@@ -2,5 +2,5 @@
 export const guestAuthPaths = ["/sign-in", "/register"] as const
 
 /** App routes that require a session (feed is exact "/") */
-export const protectedPaths = ["/library", "/profile"] as const
+export const protectedPaths = ["/library", "/profile", "/books"] as const
 

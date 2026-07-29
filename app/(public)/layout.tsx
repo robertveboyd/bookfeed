@@ -1,10 +1,10 @@
 import { requireGuest } from "@/lib/auth/util/session"
 
 export default async function Layout({
-    children,
+  children,
 }: {
-    children: React.ReactNode
+  children: React.ReactNode
 }) {
-    await requireGuest()
-    return children
+  await requireGuest()
+  return <div className="flex min-h-full flex-1 flex-col">{children}</div>
 }
