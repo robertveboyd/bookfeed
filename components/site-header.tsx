@@ -11,6 +11,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { SignOutButton } from "@/components/auth/sign-out-button"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const links = [
   { href: "/", label: "Feed" },
@@ -29,7 +30,7 @@ export default function SiteHeader() {
 
   return (
     <header className="border-b border-border">
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4">
         <Link
           href="/"
           className="font-semibold tracking-tight text-foreground"
@@ -56,6 +57,7 @@ export default function SiteHeader() {
           </NavigationMenu>
 
           <SignOutButton />
+          <ThemeToggle />
         </div>
       </div>
     </header>

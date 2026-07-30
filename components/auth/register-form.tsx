@@ -1,11 +1,11 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 
+import { PasswordInput } from "@/components/auth/password-input"
 import { Button } from "@/components/ui/button"
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -15,6 +15,8 @@ import {
   register,
   type RegisterState,
 } from "@/lib/users/actions/register"
+import { type RegisterValues } from "@/lib/users/schema"
+import { updateField } from "@/lib/forms/update-field"
 
 const initialState: RegisterState = {
   errors: {},
@@ -24,6 +26,12 @@ const initialState: RegisterState = {
 export function RegisterForm() {
   const [state, formAction, pending] = useActionState(register, initialState)
 
+  const [fields, setFields] = useState<RegisterValues>({
+    username: "",
+    email: "",
+    password: "",
+  })
+
   return (
     <form action={formAction} noValidate>
       <FieldGroup>
@@ -32,14 +40,14 @@ export function RegisterForm() {
           <Input
             id="username"
             name="username"
+            value={fields.username}
+            onChange={updateField(setFields, "username")}
             type="text"
             autoComplete="username"
+            autoFocus
             required
             aria-invalid={!!state.errors?.username || undefined}
           />
-          <FieldDescription>
-            Letters, numbers, _ and - (3–32 characters)
-          </FieldDescription>
           <FieldError>{state.errors?.username?.[0]}</FieldError>
         </Field>
 
@@ -48,6 +56,8 @@ export function RegisterForm() {
           <Input
             id="email"
             name="email"
+            value={fields.email}
+            onChange={updateField(setFields, "email")}
             type="email"
             autoComplete="email"
             required
@@ -58,10 +68,11 @@ export function RegisterForm() {
 
         <Field data-invalid={!!state.errors?.password || undefined}>
           <FieldLabel htmlFor="password">Password</FieldLabel>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
+            value={fields.password}
+            onChange={updateField(setFields, "password")}
             autoComplete="new-password"
             required
             minLength={8}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 
+import { AuthShell } from "@/components/auth/auth-shell"
 import { RegisterForm } from "@/components/auth/register-form"
 
 export const metadata: Metadata = {
@@ -9,25 +10,22 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="mx-auto max-w-sm space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Create your Bookfeed account
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Pick a username, email, and password to get started.
-        </p>
-      </div>
-
+    <AuthShell
+      title="Create account"
+      description="Track books and share what you’re reading."
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link
+            href="/sign-in"
+            className="text-foreground font-medium underline-offset-4 hover:underline"
+          >
+            Sign in
+          </Link>
+        </>
+      }
+    >
       <RegisterForm />
-
-      <p className="text-muted-foreground text-sm">
-        Already have an account?{" "}
-        <Link href="/sign-in" className="text-primary font-medium hover:underline">
-          Sign in
-        </Link>
-        .
-      </p>
-    </div>
+    </AuthShell>
   )
 }

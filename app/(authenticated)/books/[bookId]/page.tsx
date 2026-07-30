@@ -1,21 +1,29 @@
-import { Metadata } from "next";
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
 
-export const metadata: Metadata = {
-    title: "Book",
+import { BookDetail } from "@/components/catalog/book-detail"
+import { getBookById } from "@/lib/books/queries"
+
+type PageProps = {
+  params: Promise<{ bookId: string }>
 }
 
-export default async function Page({
-    params,
-}: {
-    params: Promise<{ bookId: string}>
-}){
-    const { bookId } = await params;
-    return (
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Book detail</h1>
-          <p className="text-muted-foreground">
-            Placeholder for book <code className="font-mono">{bookId}</code>.
-          </p>
-        </div>
-      )
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { bookId } = await params
+  const book = await getBookById(bookId)
+
+  return {
+    title: book?.title ?? "Book",
+  }
+}
+
+export default async function Page({ params }: PageProps) {
+  const { bookId } = await params
+  const book = await getBookById(bookId)
+
+  if (!book) notFound()
+
+  return <BookDetail book={book} />
 }

@@ -6,5 +6,8 @@ export default async function Layout({
   children: React.ReactNode
 }) {
   await requireGuest()
-  return <div className="flex min-h-full flex-1 flex-col">{children}</div>
+
+  return (
+    <main className="flex min-h-full flex-1 flex-col">{children}</main>
+  )
 }

@@ -74,9 +74,10 @@ export const books = pgTable(
       .unique(BooksUnique.openLibraryWorkKey),
     title: text("title").notNull(),
     description: text("description"),
+    genre: text("genre"), // optional denormalized label; may become genres + book_genres later
     isbn13: text("isbn13").unique(BooksUnique.isbn13),
     isbn10: text("isbn10"),
-    coverImageUrl: text("cover_image_url").notNull(),
+    coverImageId: text("cover_image_id").notNull(), // Open Library covers id (ISBN for now); build S/M/L URLs in code
     publishYear: integer("publish_year"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
