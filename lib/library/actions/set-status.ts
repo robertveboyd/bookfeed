@@ -12,15 +12,16 @@ import {
   libraryEntries,
   LibraryEntriesUnique,
 } from "@/lib/db/schema"
-import type {
-  LibraryEntry,
-  SetLibraryStatusInput,
-  SetLibraryStatusResult,
+import {
+  LIBRARY_STATUSES,
+  type LibraryEntry,
+  type SetLibraryStatusInput,
+  type SetLibraryStatusResult,
 } from "@/lib/library/types"
 
 const inputSchema = z.object({
   bookId: z.uuid(),
-  status: z.enum(["interested", "reading", "read"]),
+  status: z.enum(LIBRARY_STATUSES),
   resolveReadingConflict: z.enum(["finish", "demote"]).optional(),
 })
 

@@ -11,6 +11,8 @@ import {
   primaryKey,
 } from "drizzle-orm/pg-core"
 
+import { LIBRARY_STATUSES } from "@/lib/library/types"
+
 export const UsersUnique = {
   email: "users_email_unique",
   username: "users_username_unique",
@@ -109,11 +111,7 @@ export const bookAuthors = pgTable(
   ],
 )
 
-export const libraryStatusEnum = pgEnum("library_status", [
-  "interested",
-  "reading",
-  "read",
-])
+export const libraryStatusEnum = pgEnum("library_status", LIBRARY_STATUSES)
 
 export const LibraryEntriesUnique = {
   userBook: "library_entries_user_id_book_id_unique",

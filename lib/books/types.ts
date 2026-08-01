@@ -7,6 +7,10 @@ export const GENRES = [
 
 export type Genre = (typeof GENRES)[number]
 
+export function isGenre(value: string | null): value is Genre {
+  return value !== null && (GENRES as readonly string[]).includes(value)
+}
+
 export type BookTile = {
   id: string
   title: string

@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { BookDetail } from "@/components/catalog/book-detail"
-import { auth } from "@/lib/auth"
+import { requireSession } from "@/lib/auth/util/session"
 import { getBookById } from "@/lib/books/queries"
 import { getLibraryEntry } from "@/lib/library/queries"
 
@@ -23,13 +23,11 @@ export async function generateMetadata({
 
 export default async function Page({ params }: PageProps) {
   const { bookId } = await params
-  const session = await auth()
+  const session = await requireSession()
 
   const [book, entry] = await Promise.all([
     getBookById(bookId),
-    session?.user?.id
-      ? getLibraryEntry(session.user.id, bookId)
-      : Promise.resolve(null),
+    getLibraryEntry(session.user.id, bookId),
   ])
 
   if (!book) notFound()

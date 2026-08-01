@@ -2,7 +2,7 @@ import { and, asc, desc, eq } from "drizzle-orm"
 import { z } from "zod"
 
 import { authorsForBookIds } from "@/lib/books/queries"
-import { GENRES, type Genre } from "@/lib/books/types"
+import { isGenre } from "@/lib/books/types"
 import { db } from "@/lib/db"
 import { books, libraryEntries } from "@/lib/db/schema"
 import type {
@@ -11,10 +11,6 @@ import type {
   LibraryEntryTile,
   LibraryLists,
 } from "@/lib/library/types"
-
-function isGenre(value: string | null): value is Genre {
-  return value !== null && (GENRES as readonly string[]).includes(value)
-}
 
 const entrySelect = {
   id: libraryEntries.id,

@@ -6,17 +6,13 @@ import { authors, bookAuthors, books } from "@/lib/db/schema"
 
 import {
   GENRES,
+  isGenre,
   type BookDetail,
   type BookShelf,
   type BookTile,
-  type Genre,
   type SearchBooksParams,
-  type SearchBooksResult
+  type SearchBooksResult,
 } from "@/lib/books/types"
-
-function isGenre(value: string | null): value is Genre {
-  return value !== null && (GENRES as readonly string[]).includes(value)
-}
 
 export async function authorsForBookIds(
   bookIds: string[],
