@@ -1,13 +1,21 @@
 import Link from "next/link"
 
 import { BookCover } from "@/components/catalog/book-cover"
+import { LibraryStatusControls } from "@/components/library/library-status-controls"
 import type { BookDetail as BookDetailData } from "@/lib/books/types"
+import type { LibraryStatus } from "@/lib/library/types"
 
 type BookDetailProps = {
   book: BookDetailData
+  libraryStatus?: LibraryStatus | null
+  canEditLibrary?: boolean
 }
 
-export function BookDetail({ book }: BookDetailProps) {
+export function BookDetail({
+  book,
+  libraryStatus = null,
+  canEditLibrary = true,
+}: BookDetailProps) {
   const authorsLabel = book.authors.join(", ")
   const meta = [book.genre, book.publishYear].filter(Boolean).join(" · ")
 
@@ -43,6 +51,12 @@ export function BookDetail({ book }: BookDetailProps) {
               <p className="text-muted-foreground text-sm">{meta}</p>
             ) : null}
           </div>
+
+          <LibraryStatusControls
+            bookId={book.id}
+            initialStatus={libraryStatus}
+            canEdit={canEditLibrary}
+          />
 
           {book.description ? (
             <p className="text-sm leading-relaxed text-pretty whitespace-pre-wrap">

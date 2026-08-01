@@ -4,19 +4,26 @@ import { BookCover } from "@/components/catalog/book-cover"
 import type { BookTile as BookTileData } from "@/lib/books/types"
 import { cn } from "@/lib/utils"
 
+const tileSizeClass = {
+  sm: "w-24 sm:w-28",
+  md: "w-28 sm:w-32 md:w-36",
+} as const
+
 type BookTileProps = {
   book: BookTileData
+  size?: keyof typeof tileSizeClass
   className?: string
 }
 
-export function BookTile({ book, className }: BookTileProps) {
+export function BookTile({ book, size = "md", className }: BookTileProps) {
   const authorsLabel = book.authors.join(", ")
 
   return (
     <Link
       href={`/books/${book.id}`}
       className={cn(
-        "group/tile w-28 shrink-0 snap-start sm:w-32 md:w-36",
+        "group/tile shrink-0 snap-start",
+        tileSizeClass[size],
         className,
       )}
     >

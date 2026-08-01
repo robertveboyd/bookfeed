@@ -1,10 +1,13 @@
+import { sql } from "drizzle-orm"
 import {
   pgTable,
+  pgEnum,
   uuid,
   text,
   timestamp,
   integer,
   index,
+  uniqueIndex,
   primaryKey,
 } from "drizzle-orm/pg-core"
 
@@ -103,5 +106,43 @@ export const bookAuthors = pgTable(
   (t) => [
     primaryKey({ columns: [t.bookId, t.authorId] }),
     index("book_authors_author_id_idx").on(t.authorId),
+  ],
+)
+
+export const libraryStatusEnum = pgEnum("library_status", [
+  "interested",
+  "reading",
+  "read",
+])
+
+export const LibraryEntriesUnique = {
+  userBook: "library_entries_user_id_book_id_unique",
+  oneReadingPerUser: "library_entries_one_reading_per_user",
+} as const
+
+export const libraryEntries = pgTable(
+  "library_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    bookId: uuid("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    status: libraryStatusEnum("status").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex(LibraryEntriesUnique.userBook).on(t.userId, t.bookId),
+    uniqueIndex(LibraryEntriesUnique.oneReadingPerUser)
+      .on(t.userId)
+      .where(sql`${t.status} = 'reading'`),
+    index("library_entries_user_id_status_idx").on(t.userId, t.status),
   ],
 )

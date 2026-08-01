@@ -18,7 +18,7 @@ function isGenre(value: string | null): value is Genre {
   return value !== null && (GENRES as readonly string[]).includes(value)
 }
 
-async function authorsForBookIds(
+export async function authorsForBookIds(
   bookIds: string[],
 ): Promise<Map<string, string[]>> {
   if (bookIds.length === 0) return new Map()
