@@ -11,7 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "pnpm dlx tsx --env-file=.env.local scripts/seed-catalog.ts"
+    "db:seed": "pnpm dlx tsx --env-file=.env.local scripts/seed-catalog.ts",
+    "covers:fetch": "pnpm dlx tsx scripts/fetch-covers.ts"
   },
   "dependencies": {
     "@auth/core": "^0.41.3",

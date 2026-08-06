@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local Open Library dumps / import artifacts (multi-GB)
+/data/
+
+# local working notes (not part of the app)
+/implementation-docs/
