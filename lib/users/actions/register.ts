@@ -55,7 +55,6 @@ export async function register(
     await db.insert(users).values({
       email: parsed.data.email,
       username: parsed.data.username,
-      name: parsed.data.username,
       passwordHash,
     })
   } catch (error) {

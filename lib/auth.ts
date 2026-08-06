@@ -40,6 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
+          image: user.image,
           username: user.username,
         }
       },
@@ -54,12 +55,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id!
         token.username = user.username
+        token.picture = user.image
       }
       return token
     },
     async session({ session, token }) {
       session.user.id = token.id
       session.user.username = token.username
+      session.user.image = token.picture ?? null
       return session
     },
   },
