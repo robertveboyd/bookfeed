@@ -105,13 +105,19 @@ export async function listFriends(
   const requester = alias(users, "friendship_requester")
   const addressee = alias(users, "friendship_addressee")
 
+  // Flat unique keys — Neon fails when join selects share column names like `id`.
   const rows = await db
     .select({
-      friendship: friendshipSelect,
-      requesterId: requester.id,
+      friendshipId: friendships.id,
+      friendshipRequesterId: friendships.requesterId,
+      friendshipAddresseeId: friendships.addresseeId,
+      friendshipStatus: friendships.status,
+      friendshipCreatedAt: friendships.createdAt,
+      friendshipUpdatedAt: friendships.updatedAt,
+      requesterUserId: requester.id,
       requesterUsername: requester.username,
       requesterImage: requester.image,
-      addresseeId: addressee.id,
+      addresseeUserId: addressee.id,
       addresseeUsername: addressee.username,
       addresseeImage: addressee.image,
     })
@@ -130,19 +136,27 @@ export async function listFriends(
 
   return rows
     .map((row) => {
+      const friendship: Friendship = {
+        id: row.friendshipId,
+        requesterId: row.friendshipRequesterId,
+        addresseeId: row.friendshipAddresseeId,
+        status: row.friendshipStatus,
+        createdAt: row.friendshipCreatedAt,
+        updatedAt: row.friendshipUpdatedAt,
+      }
       const user: FriendUser =
-        row.friendship.requesterId === userId
+        friendship.requesterId === userId
           ? {
-              id: row.addresseeId,
+              id: row.addresseeUserId,
               username: row.addresseeUsername,
               image: row.addresseeImage,
             }
           : {
-              id: row.requesterId,
+              id: row.requesterUserId,
               username: row.requesterUsername,
               image: row.requesterImage,
             }
-      return { friendship: row.friendship, user }
+      return { friendship, user }
     })
     .sort((a, b) =>
       a.user.username.localeCompare(b.user.username, undefined, {
@@ -156,8 +170,15 @@ export async function listIncomingPending(
 ): Promise<FriendshipWithUser[]> {
   const rows = await db
     .select({
-      friendship: friendshipSelect,
-      user: userSelect,
+      friendshipId: friendships.id,
+      friendshipRequesterId: friendships.requesterId,
+      friendshipAddresseeId: friendships.addresseeId,
+      friendshipStatus: friendships.status,
+      friendshipCreatedAt: friendships.createdAt,
+      friendshipUpdatedAt: friendships.updatedAt,
+      userId: users.id,
+      username: users.username,
+      image: users.image,
     })
     .from(friendships)
     .innerJoin(users, eq(users.id, friendships.requesterId))
@@ -169,7 +190,21 @@ export async function listIncomingPending(
     )
     .orderBy(asc(users.username))
 
-  return rows
+  return rows.map((row) => ({
+    friendship: {
+      id: row.friendshipId,
+      requesterId: row.friendshipRequesterId,
+      addresseeId: row.friendshipAddresseeId,
+      status: row.friendshipStatus,
+      createdAt: row.friendshipCreatedAt,
+      updatedAt: row.friendshipUpdatedAt,
+    },
+    user: {
+      id: row.userId,
+      username: row.username,
+      image: row.image,
+    },
+  }))
 }
 
 export async function listOutgoingPending(
@@ -177,8 +212,15 @@ export async function listOutgoingPending(
 ): Promise<FriendshipWithUser[]> {
   const rows = await db
     .select({
-      friendship: friendshipSelect,
-      user: userSelect,
+      friendshipId: friendships.id,
+      friendshipRequesterId: friendships.requesterId,
+      friendshipAddresseeId: friendships.addresseeId,
+      friendshipStatus: friendships.status,
+      friendshipCreatedAt: friendships.createdAt,
+      friendshipUpdatedAt: friendships.updatedAt,
+      userId: users.id,
+      username: users.username,
+      image: users.image,
     })
     .from(friendships)
     .innerJoin(users, eq(users.id, friendships.addresseeId))
@@ -190,7 +232,21 @@ export async function listOutgoingPending(
     )
     .orderBy(asc(users.username))
 
-  return rows
+  return rows.map((row) => ({
+    friendship: {
+      id: row.friendshipId,
+      requesterId: row.friendshipRequesterId,
+      addresseeId: row.friendshipAddresseeId,
+      status: row.friendshipStatus,
+      createdAt: row.friendshipCreatedAt,
+      updatedAt: row.friendshipUpdatedAt,
+    },
+    user: {
+      id: row.userId,
+      username: row.username,
+      image: row.image,
+    },
+  }))
 }
 
 const SEARCH_LIMIT = 20

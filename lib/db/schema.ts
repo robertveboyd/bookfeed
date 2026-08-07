@@ -184,3 +184,34 @@ export const friendships = pgTable(
     index("friendships_requester_id_status_idx").on(t.requesterId, t.status),
   ],
 )
+
+export const ReviewsUnique = {
+  userBook: "reviews_user_id_book_id_unique",
+} as const
+
+export const reviews = pgTable(
+  "reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    bookId: uuid("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    rating: integer("rating").notNull(),
+    body: text("body"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex(ReviewsUnique.userBook).on(t.userId, t.bookId),
+    check("reviews_rating_range", sql`${t.rating} >= 1 AND ${t.rating} <= 5`),
+    index("reviews_book_id_updated_at_idx").on(t.bookId, t.updatedAt),
+    index("reviews_user_id_idx").on(t.userId),
+  ],
+)

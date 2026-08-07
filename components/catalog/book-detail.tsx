@@ -1,20 +1,25 @@
 import Link from "next/link"
 
 import { BookCover } from "@/components/catalog/book-cover"
-import { LibraryStatusControls } from "@/components/library/library-status-controls"
+import { BookDetailActions } from "@/components/catalog/book-detail-actions"
 import type { BookDetail as BookDetailData } from "@/lib/books/types"
 import type { LibraryStatus } from "@/lib/library/types"
+import type { BookRatingStats, Review } from "@/lib/reviews/types"
 
 type BookDetailProps = {
   book: BookDetailData
   libraryStatus?: LibraryStatus | null
   canEditLibrary?: boolean
+  initialReview?: Review | null
+  stats?: BookRatingStats
 }
 
 export function BookDetail({
   book,
   libraryStatus = null,
   canEditLibrary = true,
+  initialReview = null,
+  stats = { average: 0, count: 0 },
 }: BookDetailProps) {
   const authorsLabel = book.authors.join(", ")
   const meta = [book.genre, book.publishYear].filter(Boolean).join(" · ")
@@ -52,10 +57,12 @@ export function BookDetail({
             ) : null}
           </div>
 
-          <LibraryStatusControls
+          <BookDetailActions
             bookId={book.id}
-            initialStatus={libraryStatus}
-            canEdit={canEditLibrary}
+            initialLibraryStatus={libraryStatus}
+            canEditLibrary={canEditLibrary}
+            initialReview={initialReview}
+            stats={stats}
           />
 
           {book.description ? (
@@ -63,7 +70,9 @@ export function BookDetail({
               {book.description}
             </p>
           ) : (
-            <p className="text-muted-foreground text-sm">No description available.</p>
+            <p className="text-muted-foreground text-sm">
+              No description available.
+            </p>
           )}
 
           {(book.isbn13 || book.isbn10) && (

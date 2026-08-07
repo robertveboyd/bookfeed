@@ -31,12 +31,14 @@ type LibraryStatusControlsProps = {
   initialStatus: LibraryStatus | null
   /** Own library only; hide mutation UI when viewing a friend later */
   canEdit?: boolean
+  onStatusChange?: (status: LibraryStatus) => void
 }
 
 export function LibraryStatusControls({
   bookId,
   initialStatus,
   canEdit = true,
+  onStatusChange,
 }: LibraryStatusControlsProps) {
   const [status, setStatus] = useState<LibraryStatus | null>(initialStatus)
   const [error, setError] = useState<string | null>(null)
@@ -68,6 +70,7 @@ export function LibraryStatusControls({
       if (result.ok) {
         setStatus(result.entry.status)
         setConflict(null)
+        onStatusChange?.(result.entry.status)
         return
       }
 
