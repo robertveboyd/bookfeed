@@ -9,8 +9,10 @@ import {
   index,
   uniqueIndex,
   primaryKey,
+  check,
 } from "drizzle-orm/pg-core"
 
+import { FRIENDSHIP_STATUSES } from "@/lib/friends/types"
 import { LIBRARY_STATUSES } from "@/lib/library/types"
 
 export const UsersUnique = {
@@ -142,5 +144,43 @@ export const libraryEntries = pgTable(
       .on(t.userId)
       .where(sql`${t.status} = 'reading'`),
     index("library_entries_user_id_status_idx").on(t.userId, t.status),
+  ],
+)
+
+export const friendshipStatusEnum = pgEnum(
+  "friendship_status",
+  FRIENDSHIP_STATUSES,
+)
+
+export const FriendshipsUnique = {
+  pair: "friendships_requester_id_addressee_id_unique",
+} as const
+
+export const friendships = pgTable(
+  "friendships",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requesterId: uuid("requester_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    addresseeId: uuid("addressee_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: friendshipStatusEnum("status").notNull().default("pending"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex(FriendshipsUnique.pair).on(t.requesterId, t.addresseeId),
+    check(
+      "friendships_no_self",
+      sql`${t.requesterId} <> ${t.addresseeId}`,
+    ),
+    index("friendships_addressee_id_status_idx").on(t.addresseeId, t.status),
+    index("friendships_requester_id_status_idx").on(t.requesterId, t.status),
   ],
 )

@@ -17,6 +17,7 @@ const links = [
   { href: "/", label: "Feed" },
   { href: "/books", label: "Catalog" },
   { href: "/library", label: "Library" },
+  { href: "/friends", label: "Friends" },
 ]
 
 export default function SiteHeader({ user }: { user: HeaderUser }) {
