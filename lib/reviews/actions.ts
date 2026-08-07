@@ -4,6 +4,7 @@ import { and, eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
+import { recordActivity } from "@/lib/activity/record"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { books, reviews } from "@/lib/db/schema"
@@ -33,6 +34,7 @@ const deleteSchema = z.object({
 function revalidateReviewPaths(bookId: string, username?: string) {
   revalidatePath(`/books/${bookId}`)
   revalidatePath("/library")
+  revalidatePath("/")
   if (username) {
     revalidatePath(`/users/${username}/books/${bookId}`)
   }
@@ -95,6 +97,18 @@ export async function upsertReview(
         .set({ rating, body, updatedAt: now })
         .where(eq(reviews.id, existing.id))
         .returning(reviewSelect)
+
+      // First time body appears → reviewed. Rating/body edits alone → no event.
+      if (!existing.body && body) {
+        await recordActivity({
+          actorId: userId,
+          type: "reviewed",
+          bookId,
+          reviewId: updated.id,
+          rating: updated.rating,
+        })
+      }
+
       revalidateReviewPaths(bookId, username)
       return { ok: true, review: updated }
     }
@@ -103,6 +117,16 @@ export async function upsertReview(
       .insert(reviews)
       .values({ userId, bookId, rating, body, updatedAt: now })
       .returning(reviewSelect)
+
+    // First save with body → reviewed only; rating-only → rated.
+    await recordActivity({
+      actorId: userId,
+      type: body ? "reviewed" : "rated",
+      bookId,
+      reviewId: inserted.id,
+      rating: inserted.rating,
+    })
+
     revalidateReviewPaths(bookId, username)
     return { ok: true, review: inserted }
   } catch {
@@ -135,6 +159,7 @@ export async function deleteReview(input: {
     return { ok: false, code: "not_found", message: "No rating to clear." }
   }
 
+  // Activity rows kept; reviewId set null via FK ON DELETE SET NULL.
   await db
     .delete(reviews)
     .where(and(eq(reviews.id, existing.id), eq(reviews.userId, userId)))

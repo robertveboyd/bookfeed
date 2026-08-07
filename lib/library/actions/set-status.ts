@@ -4,6 +4,7 @@ import { and, eq, ne } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
+import { recordActivity } from "@/lib/activity/record"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getPgError, PgCode } from "@/lib/db/errors"
@@ -15,6 +16,7 @@ import {
 import {
   LIBRARY_STATUSES,
   type LibraryEntry,
+  type LibraryStatus,
   type SetLibraryStatusInput,
   type SetLibraryStatusResult,
 } from "@/lib/library/types"
@@ -99,6 +101,15 @@ export async function setLibraryStatus(
             updatedAt: now,
           })
           .where(eq(libraryEntries.id, current.id))
+
+        // Only reading → read emits finished_reading (not demote to interested).
+        if (resolveReadingConflict === "finish") {
+          await recordActivity({
+            actorId: userId,
+            type: "finished_reading",
+            bookId: current.bookId,
+          })
+        }
       }
     }
 
@@ -114,6 +125,7 @@ export async function setLibraryStatus(
       )
       .limit(1)
 
+    const previousStatus: LibraryStatus | null = existing?.status ?? null
     const fields = { status, updatedAt: now }
 
     let entry: LibraryEntry
@@ -132,9 +144,24 @@ export async function setLibraryStatus(
       entry = inserted
     }
 
+    if (status === "reading" && previousStatus !== "reading") {
+      await recordActivity({
+        actorId: userId,
+        type: "started_reading",
+        bookId,
+      })
+    } else if (status === "read" && previousStatus === "reading") {
+      await recordActivity({
+        actorId: userId,
+        type: "finished_reading",
+        bookId,
+      })
+    }
+
     revalidatePath(`/books/${bookId}`)
     revalidatePath("/library")
     revalidatePath("/profile")
+    revalidatePath("/")
 
     return { ok: true, entry }
   } catch (error) {

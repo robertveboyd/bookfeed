@@ -14,6 +14,7 @@ import {
 
 import { FRIENDSHIP_STATUSES } from "@/lib/friends/types"
 import { LIBRARY_STATUSES } from "@/lib/library/types"
+import { ACTIVITY_TYPES } from "@/lib/activity/types"
 
 export const UsersUnique = {
   email: "users_email_unique",
@@ -213,5 +214,36 @@ export const reviews = pgTable(
     check("reviews_rating_range", sql`${t.rating} >= 1 AND ${t.rating} <= 5`),
     index("reviews_book_id_updated_at_idx").on(t.bookId, t.updatedAt),
     index("reviews_user_id_idx").on(t.userId),
+  ],
+)
+
+export const activityTypeEnum = pgEnum("activity_type", ACTIVITY_TYPES)
+
+export const activities = pgTable(
+  "activities",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    actorId: uuid("actor_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: activityTypeEnum("type").notNull(),
+    bookId: uuid("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    reviewId: uuid("review_id").references(() => reviews.id, {
+      onDelete: "set null",
+    }),
+    rating: integer("rating"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("activities_created_at_idx").on(t.createdAt),
+    index("activities_actor_id_created_at_idx").on(t.actorId, t.createdAt),
+    check(
+      "activities_rating_range",
+      sql`${t.rating} IS NULL OR (${t.rating} >= 1 AND ${t.rating} <= 5)`,
+    ),
   ],
 )
