@@ -2,8 +2,9 @@ import { and, asc, eq, ilike, inArray, ne, or } from "drizzle-orm"
 import { alias } from "drizzle-orm/pg-core"
 
 import { db } from "@/lib/db"
-import { friendships, users } from "@/lib/db/schema"
+import { friendships, libraryEntries, books, users } from "@/lib/db/schema"
 import type {
+  FriendRailItem,
   FriendUser,
   Friendship,
   FriendshipRelation,
@@ -99,6 +100,28 @@ export async function getFriendshipRelation(
   }
 }
 
+export async function listAcceptedFriendIds(userId: string): Promise<string[]> {
+  const rows = await db
+    .select({
+      requesterId: friendships.requesterId,
+      addresseeId: friendships.addresseeId,
+    })
+    .from(friendships)
+    .where(
+      and(
+        eq(friendships.status, "accepted"),
+        or(
+          eq(friendships.requesterId, userId),
+          eq(friendships.addresseeId, userId),
+        ),
+      ),
+    )
+
+  return rows.map((row) =>
+    row.requesterId === userId ? row.addresseeId : row.requesterId,
+  )
+}
+
 export async function listFriends(
   userId: string,
 ): Promise<FriendshipWithUser[]> {
@@ -163,6 +186,46 @@ export async function listFriends(
         sensitivity: "base",
       }),
     )
+}
+
+export async function listFriendsWithReading(
+  userId: string,
+): Promise<FriendRailItem[]> {
+  const friends = await listFriends(userId)
+  if (friends.length === 0) return []
+
+  const friendIds = friends.map((f) => f.user.id)
+  const readingRows = await db
+    .select({
+      userId: libraryEntries.userId,
+      bookId: books.id,
+      title: books.title,
+      coverImageId: books.coverImageId,
+    })
+    .from(libraryEntries)
+    .innerJoin(books, eq(books.id, libraryEntries.bookId))
+    .where(
+      and(
+        inArray(libraryEntries.userId, friendIds),
+        eq(libraryEntries.status, "reading"),
+      ),
+    )
+
+  const readingByUser = new Map(
+    readingRows.map((row) => [
+      row.userId,
+      {
+        bookId: row.bookId,
+        title: row.title,
+        coverImageId: row.coverImageId,
+      },
+    ]),
+  )
+
+  return friends.map(({ user }) => ({
+    ...user,
+    reading: readingByUser.get(user.id) ?? null,
+  }))
 }
 
 export async function listIncomingPending(
