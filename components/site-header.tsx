@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { UserMenu, type HeaderUser } from "@/components/auth/user-menu"
+import { ThemeToggle } from "@/components/theme-toggle"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -10,17 +12,14 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { SignOutButton } from "@/components/auth/sign-out-button"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 const links = [
   { href: "/", label: "Feed" },
   { href: "/books", label: "Catalog" },
   { href: "/library", label: "Library" },
-  { href: "/profile", label: "Profile" },
 ]
 
-export default function SiteHeader() {
+export default function SiteHeader({ user }: { user: HeaderUser }) {
   const pathname = usePathname()
 
   function isActive(href: string) {
@@ -56,7 +55,7 @@ export default function SiteHeader() {
             </NavigationMenuList>
           </NavigationMenu>
 
-          <SignOutButton />
+          <UserMenu user={user} />
           <ThemeToggle />
         </div>
       </div>

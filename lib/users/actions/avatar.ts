@@ -84,6 +84,7 @@ export async function uploadAvatar(
   }
 
   revalidatePath("/profile")
+  revalidatePath("/", "layout")
   return { ok: true, imageUrl: blob.url }
 }
 
@@ -113,5 +114,6 @@ export async function removeAvatar(): Promise<AvatarActionResult> {
   }
 
   revalidatePath("/profile")
+  revalidatePath("/", "layout")
   return { ok: true, imageUrl: null }
 }
