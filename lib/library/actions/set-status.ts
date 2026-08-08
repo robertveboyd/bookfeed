@@ -20,6 +20,7 @@ import {
   type SetLibraryStatusInput,
   type SetLibraryStatusResult,
 } from "@/lib/library/types"
+import { removeTopBookForUserBook } from "@/lib/users/top-books/queries"
 
 const inputSchema = z.object({
   bookId: z.uuid(),
@@ -42,6 +43,7 @@ export async function setLibraryStatus(
     return { ok: false, code: "unauthorized", message: "Sign in required." }
   }
   const userId = session.user.id
+  const username = session.user.username
 
   const parsed = inputSchema.safeParse(input)
   if (!parsed.success) {
@@ -158,10 +160,15 @@ export async function setLibraryStatus(
       })
     }
 
+    if (previousStatus === "read" && status !== "read") {
+      await removeTopBookForUserBook(userId, bookId)
+    }
+
     revalidatePath(`/books/${bookId}`)
     revalidatePath("/library")
     revalidatePath("/profile")
     revalidatePath("/")
+    if (username) revalidatePath(`/users/${username}`)
 
     return { ok: true, entry }
   } catch (error) {

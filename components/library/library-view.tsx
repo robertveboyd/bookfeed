@@ -3,8 +3,11 @@ import type { ReactNode } from "react"
 
 import { BookCover } from "@/components/catalog/book-cover"
 import { BookTile } from "@/components/catalog/book-tile"
+import { TopBooksEditor } from "@/components/library/top-books-editor"
 import { buttonVariants } from "@/components/ui/button"
+import type { BookTile as BookTileData } from "@/lib/books/types"
 import type { LibraryEntryTile, LibraryLists } from "@/lib/library/types"
+import type { TopBookSlot } from "@/lib/users/top-books/types"
 
 function CatalogCta({
   label = "Browse catalog",
@@ -213,11 +216,14 @@ function FullyEmptyLibrary() {
 
 type LibraryViewProps = {
   lists: LibraryLists
+  topBooks: TopBookSlot[]
 }
 
-export function LibraryView({ lists }: LibraryViewProps) {
+export function LibraryView({ lists, topBooks }: LibraryViewProps) {
   const isEmpty =
     !lists.reading && lists.read.length === 0 && lists.interested.length === 0
+
+  const readBooks: BookTileData[] = lists.read.map((e) => e.book)
 
   if (isEmpty) {
     return <FullyEmptyLibrary />
@@ -234,6 +240,8 @@ export function LibraryView({ lists }: LibraryViewProps) {
       </div>
 
       <CurrentlyReading entry={lists.reading} />
+
+      <TopBooksEditor initialSlots={topBooks} readBooks={readBooks} />
 
       <LibraryGridSection
         title="Read"

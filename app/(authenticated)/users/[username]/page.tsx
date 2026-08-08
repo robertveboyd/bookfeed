@@ -1,13 +1,20 @@
+import { eq } from "drizzle-orm"
 import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
 
-import { FriendshipActions } from "@/components/friends/friendship-actions"
-import { UserAvatar } from "@/components/profile/user-avatar"
+import { UserProfileView } from "@/components/users/user-profile-view"
+import { authorsForBookIds } from "@/lib/books/queries"
+import { isGenre } from "@/lib/books/types"
 import { requireSession } from "@/lib/auth/util/session"
+import { db } from "@/lib/db"
+import { books } from "@/lib/db/schema"
 import {
   getFriendshipRelation,
   getUserByUsername,
 } from "@/lib/friends/queries"
+import { getCurrentlyReading, listLibrary } from "@/lib/library/queries"
+import type { LibraryEntryTile } from "@/lib/library/types"
+import { listTopBooks } from "@/lib/users/top-books/queries"
 
 type PageProps = {
   params: Promise<{ username: string }>
@@ -20,6 +27,46 @@ export async function generateMetadata({
   const user = await getUserByUsername(username)
   return {
     title: user ? `@${user.username}` : "User",
+  }
+}
+
+async function getReadingTile(
+  userId: string,
+): Promise<LibraryEntryTile | null> {
+  const entry = await getCurrentlyReading(userId)
+  if (!entry) return null
+
+  const [book] = await db
+    .select({
+      id: books.id,
+      title: books.title,
+      coverImageId: books.coverImageId,
+      genre: books.genre,
+      description: books.description,
+      publishYear: books.publishYear,
+    })
+    .from(books)
+    .where(eq(books.id, entry.bookId))
+    .limit(1)
+
+  if (!book) return null
+
+  const authorMap = await authorsForBookIds([book.id])
+
+  return {
+    id: entry.id,
+    bookId: entry.bookId,
+    status: entry.status,
+    updatedAt: entry.updatedAt,
+    book: {
+      id: book.id,
+      title: book.title,
+      coverImageId: book.coverImageId,
+      genre: isGenre(book.genre) ? book.genre : null,
+      authors: authorMap.get(book.id) ?? [],
+      description: book.description,
+      publishYear: book.publishYear,
+    },
   }
 }
 
@@ -43,36 +90,36 @@ export default async function Page({ params }: PageProps) {
     redirect("/profile")
   }
 
-  return (
-    <div className="mx-auto max-w-2xl space-y-8">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <UserAvatar
-            userId={user.id}
-            username={user.username}
-            imageUrl={user.image}
-            size={80}
-          />
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              @{user.username}
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              {relation === "friends"
-                ? "You’re friends. Library coming soon."
-                : "Add them as a friend to see more."}
-            </p>
-          </div>
-        </div>
+  const isFriend = relation === "friends"
 
-        <FriendshipActions
-          userId={user.id}
-          username={user.username}
-          relation={relation}
-          friendshipId={friendship?.id ?? null}
-          size="default"
-        />
-      </div>
-    </div>
+  if (isFriend) {
+    const [lists, topBooks] = await Promise.all([
+      listLibrary(user.id),
+      listTopBooks(user.id),
+    ])
+
+    return (
+      <UserProfileView
+        user={user}
+        relation={relation}
+        friendshipId={friendship?.id ?? null}
+        mode="friend"
+        lists={lists}
+        topBooks={topBooks}
+      />
+    )
+  }
+
+  const reading = await getReadingTile(user.id)
+
+  return (
+    <UserProfileView
+      user={user}
+      relation={relation}
+      friendshipId={friendship?.id ?? null}
+      mode="limited"
+      lists={{ reading }}
+      topBooks={[]}
+    />
   )
 }

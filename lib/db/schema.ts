@@ -247,3 +247,37 @@ export const activities = pgTable(
     ),
   ],
 )
+
+export const UserTopBooksUnique = {
+  userPosition: "user_top_books_user_id_position_unique",
+  userBook: "user_top_books_user_id_book_id_unique",
+} as const
+
+export const userTopBooks = pgTable(
+  "user_top_books",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    bookId: uuid("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.position] }),
+    uniqueIndex(UserTopBooksUnique.userPosition).on(t.userId, t.position),
+    uniqueIndex(UserTopBooksUnique.userBook).on(t.userId, t.bookId),
+    check(
+      "user_top_books_position_range",
+      sql`${t.position} >= 1 AND ${t.position} <= 5`,
+    ),
+    index("user_top_books_user_id_idx").on(t.userId),
+  ],
+)
