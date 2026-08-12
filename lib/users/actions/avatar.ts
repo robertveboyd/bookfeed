@@ -38,6 +38,16 @@ async function requireUserId(): Promise<string | null> {
   return session?.user?.id ?? null
 }
 
+function revalidateAvatarPaths(username?: string | null) {
+  revalidatePath("/profile")
+  // Header avatar in authenticated layout.
+  revalidatePath("/", "layout")
+  // Feed / friends rail avatars.
+  revalidatePath("/")
+  revalidatePath("/friends")
+  if (username) revalidatePath(`/users/${username}`)
+}
+
 export async function uploadAvatar(
   formData: FormData,
 ): Promise<AvatarActionResult> {
@@ -58,7 +68,7 @@ export async function uploadAvatar(
   }
 
   const [existing] = await db
-    .select({ image: users.image })
+    .select({ image: users.image, username: users.username })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
@@ -83,8 +93,7 @@ export async function uploadAvatar(
     }
   }
 
-  revalidatePath("/profile")
-  revalidatePath("/", "layout")
+  revalidateAvatarPaths(existing?.username)
   return { ok: true, imageUrl: blob.url }
 }
 
@@ -95,7 +104,7 @@ export async function removeAvatar(): Promise<AvatarActionResult> {
   }
 
   const [existing] = await db
-    .select({ image: users.image })
+    .select({ image: users.image, username: users.username })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
@@ -113,7 +122,6 @@ export async function removeAvatar(): Promise<AvatarActionResult> {
     }
   }
 
-  revalidatePath("/profile")
-  revalidatePath("/", "layout")
+  revalidateAvatarPaths(existing?.username)
   return { ok: true, imageUrl: null }
 }

@@ -18,10 +18,16 @@ const inputSchema = z.object({
   userId: z.uuid(),
 })
 
-function revalidateFriendPaths(username?: string) {
+/** Friends list, feed rail, and both user profiles when a pair changes. */
+function revalidateFriendPaths(usernames: Array<string | null | undefined>) {
   revalidatePath("/friends")
   revalidatePath("/")
-  if (username) revalidatePath(`/users/${username}`)
+  const seen = new Set<string>()
+  for (const username of usernames) {
+    if (!username || seen.has(username)) continue
+    seen.add(username)
+    revalidatePath(`/users/${username}`)
+  }
 }
 
 export async function sendFriendRequest(input: {
@@ -32,6 +38,7 @@ export async function sendFriendRequest(input: {
     return { ok: false, code: "unauthorized", message: "Sign in required." }
   }
   const viewerId = session.user.id
+  const viewerUsername = session.user.username
 
   const parsed = inputSchema.safeParse(input)
   if (!parsed.success) {
@@ -81,7 +88,7 @@ export async function sendFriendRequest(input: {
       addresseeId: targetId,
       status: "pending",
     })
-    revalidateFriendPaths(target.username)
+    revalidateFriendPaths([viewerUsername, target.username])
     return { ok: true }
   } catch (error) {
     const pg = getPgError(error)
@@ -111,6 +118,7 @@ export async function acceptFriendRequest(input: {
     return { ok: false, code: "unauthorized", message: "Sign in required." }
   }
   const viewerId = session.user.id
+  const viewerUsername = session.user.username
 
   const parsed = z.object({ friendshipId: z.uuid() }).safeParse(input)
   if (!parsed.success) {
@@ -145,7 +153,7 @@ export async function acceptFriendRequest(input: {
       and(eq(friendships.id, row.id), eq(friendships.addresseeId, viewerId)),
     )
 
-  revalidateFriendPaths(requester?.username)
+  revalidateFriendPaths([viewerUsername, requester?.username])
   return { ok: true }
 }
 
@@ -157,6 +165,7 @@ export async function cancelFriendRequest(input: {
     return { ok: false, code: "unauthorized", message: "Sign in required." }
   }
   const viewerId = session.user.id
+  const viewerUsername = session.user.username
 
   const parsed = z.object({ friendshipId: z.uuid() }).safeParse(input)
   if (!parsed.success) {
@@ -189,7 +198,7 @@ export async function cancelFriendRequest(input: {
 
   const addressee = await getUserById(row.addresseeId)
   await db.delete(friendships).where(eq(friendships.id, row.id))
-  revalidateFriendPaths(addressee?.username)
+  revalidateFriendPaths([viewerUsername, addressee?.username])
   return { ok: true }
 }
 
@@ -201,6 +210,7 @@ export async function declineFriendRequest(input: {
     return { ok: false, code: "unauthorized", message: "Sign in required." }
   }
   const viewerId = session.user.id
+  const viewerUsername = session.user.username
 
   const parsed = z.object({ friendshipId: z.uuid() }).safeParse(input)
   if (!parsed.success) {
@@ -233,7 +243,7 @@ export async function declineFriendRequest(input: {
 
   const requester = await getUserById(row.requesterId)
   await db.delete(friendships).where(eq(friendships.id, row.id))
-  revalidateFriendPaths(requester?.username)
+  revalidateFriendPaths([viewerUsername, requester?.username])
   return { ok: true }
 }
 
@@ -245,6 +255,7 @@ export async function unfriend(input: {
     return { ok: false, code: "unauthorized", message: "Sign in required." }
   }
   const viewerId = session.user.id
+  const viewerUsername = session.user.username
 
   const parsed = inputSchema.safeParse(input)
   if (!parsed.success) {
@@ -263,6 +274,6 @@ export async function unfriend(input: {
 
   const other = await getUserById(otherId)
   await db.delete(friendships).where(eq(friendships.id, existing.id))
-  revalidateFriendPaths(other?.username)
+  revalidateFriendPaths([viewerUsername, other?.username])
   return { ok: true }
 }

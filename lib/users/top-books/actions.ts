@@ -13,6 +13,7 @@ const saveSchema = z.object({
   bookIds: z.array(z.uuid()).max(5),
 })
 
+/** Library editor + friend-facing profile Top 5. */
 function revalidateTopBookPaths(username?: string) {
   revalidatePath("/library")
   if (username) revalidatePath(`/users/${username}`)

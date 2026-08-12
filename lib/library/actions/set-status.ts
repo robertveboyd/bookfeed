@@ -40,15 +40,19 @@ const entryReturning = {
   updatedAt: libraryEntries.updatedAt,
 } as const
 
-function revalidateLibraryPaths(bookId: string, username?: string) {
+function revalidateLibraryPaths(
+  bookId: string,
+  options?: { username?: string; alsoBookId?: string },
+) {
   revalidatePath(`/books/${bookId}`)
-  // Avoid revalidatePath("/books") here — it refetches the whole catalog on
-  // every tile status change. Catalog tiles update local state; library and
-  // detail paths still refresh.
+  if (options?.alsoBookId && options.alsoBookId !== bookId) {
+    revalidatePath(`/books/${options.alsoBookId}`)
+  }
+  // Avoid revalidatePath("/books") — catalog tiles update local state.
   revalidatePath("/library")
-  revalidatePath("/profile")
+  // Feed activity + friends rail currently-reading badge.
   revalidatePath("/")
-  if (username) revalidatePath(`/users/${username}`)
+  if (options?.username) revalidatePath(`/users/${options.username}`)
 }
 
 export async function setLibraryStatus(
@@ -77,6 +81,8 @@ export async function setLibraryStatus(
   }
 
   try {
+    let resolvedConflictBookId: string | undefined
+
     if (status === "reading") {
       const [current] = await db
         .select({
@@ -119,6 +125,8 @@ export async function setLibraryStatus(
             updatedAt: now,
           })
           .where(eq(libraryEntries.id, current.id))
+
+        resolvedConflictBookId = current.bookId
 
         // Only reading → read emits finished_reading (not demote to interested).
         if (resolveReadingConflict === "finish") {
@@ -180,7 +188,10 @@ export async function setLibraryStatus(
       await removeTopBookForUserBook(userId, bookId)
     }
 
-    revalidateLibraryPaths(bookId, username)
+    revalidateLibraryPaths(bookId, {
+      username,
+      alsoBookId: resolvedConflictBookId,
+    })
 
     return { ok: true, entry }
   } catch (error) {
@@ -271,6 +282,6 @@ export async function clearLibraryStatus(input: {
     await removeTopBookForUserBook(userId, bookId)
   }
 
-  revalidateLibraryPaths(bookId, username)
+  revalidateLibraryPaths(bookId, { username })
   return { ok: true }
 }

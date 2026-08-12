@@ -33,7 +33,7 @@ const deleteSchema = z.object({
 
 function revalidateReviewPaths(bookId: string, username?: string) {
   revalidatePath(`/books/${bookId}`)
-  revalidatePath("/library")
+  // Feed may gain rated/reviewed activity.
   revalidatePath("/")
   if (username) {
     revalidatePath(`/users/${username}/books/${bookId}`)
