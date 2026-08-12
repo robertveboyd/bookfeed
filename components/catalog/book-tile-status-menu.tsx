@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { CheckIcon, ChevronDownIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState, useTransition } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -12,15 +14,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   clearLibraryStatus,
   setLibraryStatus,
 } from "@/lib/library/actions/set-status"
-import type {
-  LibraryStatus,
-  ReadingConflict,
-} from "@/lib/library/types"
+import type { LibraryStatus, ReadingConflict } from "@/lib/library/types"
+import { cn } from "@/lib/utils"
 
-const ACTIONS: {
+const STATUS_OPTIONS: {
   status: LibraryStatus
   label: string
 }[] = [
@@ -29,34 +35,24 @@ const ACTIONS: {
   { status: "read", label: "Finished" },
 ]
 
-type LibraryStatusControlsProps = {
+type BookTileStatusMenuProps = {
   bookId: string
   initialStatus: LibraryStatus | null
-  /** Own library only; hide mutation UI when viewing a friend later */
-  canEdit?: boolean
-  onStatusChange?: (status: LibraryStatus | null) => void
 }
 
-export function LibraryStatusControls({
+export function BookTileStatusMenu({
   bookId,
   initialStatus,
-  canEdit = true,
-  onStatusChange,
-}: LibraryStatusControlsProps) {
+}: BookTileStatusMenuProps) {
+  const router = useRouter()
   const [status, setStatus] = useState<LibraryStatus | null>(initialStatus)
   const [error, setError] = useState<string | null>(null)
   const [conflict, setConflict] = useState<ReadingConflict | null>(null)
   const [pending, startTransition] = useTransition()
 
-  if (!canEdit) {
-    if (!status) return null
-    const label = ACTIONS.find((a) => a.status === status)?.label ?? status
-    return (
-      <p className="text-muted-foreground text-sm">
-        Status: <span className="text-foreground font-medium">{label}</span>
-      </p>
-    )
-  }
+  useEffect(() => {
+    setStatus(initialStatus)
+  }, [initialStatus])
 
   function applyStatus(
     next: LibraryStatus,
@@ -73,7 +69,10 @@ export function LibraryStatusControls({
       if (result.ok) {
         setStatus(result.entry.status)
         setConflict(null)
-        onStatusChange?.(result.entry.status)
+        // Conflict resolution also changes another book's status — refresh shelves.
+        if (resolveReadingConflict) {
+          router.refresh()
+        }
         return
       }
 
@@ -94,7 +93,6 @@ export function LibraryStatusControls({
       if (result.ok) {
         setStatus(null)
         setConflict(null)
-        onStatusChange?.(null)
         return
       }
       setError(result.message)
@@ -111,28 +109,66 @@ export function LibraryStatusControls({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {ACTIONS.map(({ status: actionStatus, label }) => {
-          const active = status === actionStatus
-          return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
             <Button
-              key={actionStatus}
               type="button"
-              size="sm"
-              variant={active ? "default" : "outline"}
+              size="icon-xs"
+              variant="secondary"
               disabled={pending}
-              aria-pressed={active}
-              title={active ? "Click again to remove status" : undefined}
-              onClick={() => onSelect(actionStatus)}
-            >
-              {label}
-            </Button>
-          )
-        })}
-      </div>
+              aria-label="Update library status"
+              className={cn(
+                "bg-background/90 pointer-events-auto size-6 shadow-sm backdrop-blur-sm",
+                // Touch: always visible. Hover devices: only on tile hover / open / focus.
+                "opacity-100 [@media(hover:hover)]:opacity-0",
+                "[@media(hover:hover)]:group-hover/tile:opacity-100",
+                "[@media(hover:hover)]:focus-visible:opacity-100",
+                "data-popup-open:opacity-100",
+              )}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            />
+          }
+        >
+          <ChevronDownIcon className="size-3.5" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          side="bottom"
+          sideOffset={4}
+          className="w-auto min-w-40"
+        >
+          {STATUS_OPTIONS.map(({ status: optionStatus, label }) => {
+            const active = status === optionStatus
+            return (
+              <DropdownMenuItem
+                key={optionStatus}
+                disabled={pending}
+                className="gap-2"
+                onClick={() => onSelect(optionStatus)}
+              >
+                <CheckIcon
+                  className={cn(
+                    "size-4",
+                    active ? "opacity-100" : "opacity-0",
+                  )}
+                />
+                {label}
+              </DropdownMenuItem>
+            )
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      {error ? <p className="text-destructive text-sm">{error}</p> : null}
+      {error ? (
+        <p className="bg-background/95 text-destructive absolute top-full right-0 z-20 mt-1 max-w-40 rounded-md p-1.5 text-[10px] leading-snug shadow-sm ring-1 ring-border">
+          {error}
+        </p>
+      ) : null}
 
       <Dialog
         open={conflict !== null}
@@ -176,6 +212,6 @@ export function LibraryStatusControls({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   )
 }

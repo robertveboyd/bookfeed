@@ -53,3 +53,11 @@ export type SetLibraryStatusResult =
       code: "unauthorized" | "not_found" | "invalid"
       message: string
     }
+
+export type ClearLibraryStatusResult =
+  | { ok: true }
+  | {
+      ok: false
+      code: "unauthorized" | "not_found" | "invalid"
+      message: string
+    }

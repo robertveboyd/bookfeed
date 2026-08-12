@@ -15,6 +15,7 @@ import {
 } from "@/lib/db/schema"
 import {
   LIBRARY_STATUSES,
+  type ClearLibraryStatusResult,
   type LibraryEntry,
   type LibraryStatus,
   type SetLibraryStatusInput,
@@ -28,12 +29,27 @@ const inputSchema = z.object({
   resolveReadingConflict: z.enum(["finish", "demote"]).optional(),
 })
 
+const clearSchema = z.object({
+  bookId: z.uuid(),
+})
+
 const entryReturning = {
   id: libraryEntries.id,
   bookId: libraryEntries.bookId,
   status: libraryEntries.status,
   updatedAt: libraryEntries.updatedAt,
 } as const
+
+function revalidateLibraryPaths(bookId: string, username?: string) {
+  revalidatePath(`/books/${bookId}`)
+  // Avoid revalidatePath("/books") here — it refetches the whole catalog on
+  // every tile status change. Catalog tiles update local state; library and
+  // detail paths still refresh.
+  revalidatePath("/library")
+  revalidatePath("/profile")
+  revalidatePath("/")
+  if (username) revalidatePath(`/users/${username}`)
+}
 
 export async function setLibraryStatus(
   input: SetLibraryStatusInput,
@@ -164,11 +180,7 @@ export async function setLibraryStatus(
       await removeTopBookForUserBook(userId, bookId)
     }
 
-    revalidatePath(`/books/${bookId}`)
-    revalidatePath("/library")
-    revalidatePath("/profile")
-    revalidatePath("/")
-    if (username) revalidatePath(`/users/${username}`)
+    revalidateLibraryPaths(bookId, username)
 
     return { ok: true, entry }
   } catch (error) {
@@ -216,4 +228,49 @@ export async function setLibraryStatus(
       message: "Something went wrong. Please try again.",
     }
   }
+}
+
+/** Remove this book from the user's library (no status). */
+export async function clearLibraryStatus(input: {
+  bookId: string
+}): Promise<ClearLibraryStatusResult> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { ok: false, code: "unauthorized", message: "Sign in required." }
+  }
+  const userId = session.user.id
+  const username = session.user.username
+
+  const parsed = clearSchema.safeParse(input)
+  if (!parsed.success) {
+    return { ok: false, code: "invalid", message: "Invalid input." }
+  }
+  const { bookId } = parsed.data
+
+  const [existing] = await db
+    .select({
+      id: libraryEntries.id,
+      status: libraryEntries.status,
+    })
+    .from(libraryEntries)
+    .where(
+      and(
+        eq(libraryEntries.userId, userId),
+        eq(libraryEntries.bookId, bookId),
+      ),
+    )
+    .limit(1)
+
+  if (!existing) {
+    return { ok: false, code: "not_found", message: "Not in your library." }
+  }
+
+  await db.delete(libraryEntries).where(eq(libraryEntries.id, existing.id))
+
+  if (existing.status === "read") {
+    await removeTopBookForUserBook(userId, bookId)
+  }
+
+  revalidateLibraryPaths(bookId, username)
+  return { ok: true }
 }

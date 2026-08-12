@@ -6,14 +6,22 @@ import { useRef } from "react"
 import { BookTile } from "@/components/catalog/book-tile"
 import { Button } from "@/components/ui/button"
 import type { BookShelf as BookShelfData } from "@/lib/books/types"
+import type { LibraryStatus } from "@/lib/library/types"
 import { cn } from "@/lib/utils"
 
 type BookShelfProps = {
   shelf: BookShelfData
   className?: string
+  statusByBookId?: Record<string, LibraryStatus>
+  showStatusMenu?: boolean
 }
 
-export function BookShelf({ shelf, className }: BookShelfProps) {
+export function BookShelf({
+  shelf,
+  className,
+  statusByBookId = {},
+  showStatusMenu = false,
+}: BookShelfProps) {
   const scrollerRef = useRef<HTMLDivElement>(null)
 
   function scrollByPage(direction: -1 | 1) {
@@ -56,7 +64,12 @@ export function BookShelf({ shelf, className }: BookShelfProps) {
           className="flex gap-3 overflow-x-auto scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
         >
           {shelf.books.map((book) => (
-            <BookTile key={book.id} book={book} />
+            <BookTile
+              key={book.id}
+              book={book}
+              showStatusMenu={showStatusMenu}
+              libraryStatus={statusByBookId[book.id] ?? null}
+            />
           ))}
         </div>
       </div>

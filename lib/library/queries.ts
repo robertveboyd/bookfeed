@@ -1,4 +1,4 @@
-import { and, asc, desc, eq } from "drizzle-orm"
+import { and, asc, desc, eq, inArray } from "drizzle-orm"
 import { z } from "zod"
 
 import { authorsForBookIds } from "@/lib/books/queries"
@@ -10,6 +10,7 @@ import type {
   LibraryEntry,
   LibraryEntryTile,
   LibraryLists,
+  LibraryStatus,
 } from "@/lib/library/types"
 
 const entrySelect = {
@@ -37,6 +38,34 @@ export async function getLibraryEntry(
     .limit(1)
 
   return row ?? null
+}
+
+/** Statuses for a set of books (catalog tiles). Missing ids → not in library. */
+export async function getLibraryStatusMap(
+  userId: string,
+  bookIds: string[],
+): Promise<Record<string, LibraryStatus>> {
+  const unique = [...new Set(bookIds.filter((id) => z.uuid().safeParse(id).success))]
+  if (unique.length === 0) return {}
+
+  const rows = await db
+    .select({
+      bookId: libraryEntries.bookId,
+      status: libraryEntries.status,
+    })
+    .from(libraryEntries)
+    .where(
+      and(
+        eq(libraryEntries.userId, userId),
+        inArray(libraryEntries.bookId, unique),
+      ),
+    )
+
+  const map: Record<string, LibraryStatus> = {}
+  for (const row of rows) {
+    map[row.bookId] = row.status
+  }
+  return map
 }
 
 export async function getCurrentlyReading(
