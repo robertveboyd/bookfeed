@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 
+import { FeedFallback } from "@/components/feed/feed-fallback"
 import { FeedList } from "@/components/feed/feed-list"
 import { FriendsRail } from "@/components/feed/friends-rail"
 import { listFriendsFeed } from "@/lib/activity/queries"
@@ -10,7 +12,7 @@ export const metadata: Metadata = {
   title: "Feed",
 }
 
-export default async function Page() {
+async function FeedContent() {
   const session = await requireSession()
 
   const [feed, friends] = await Promise.all([
@@ -36,9 +38,18 @@ export default async function Page() {
           <FeedList
             initialItems={feed.items}
             initialCursor={feed.nextCursor}
+            friendCount={friends.length}
           />
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<FeedFallback />}>
+      <FeedContent />
+    </Suspense>
   )
 }

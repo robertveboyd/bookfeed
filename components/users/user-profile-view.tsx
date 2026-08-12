@@ -4,6 +4,7 @@ import { BookCover } from "@/components/catalog/book-cover"
 import { BookTile } from "@/components/catalog/book-tile"
 import { FriendshipActions } from "@/components/friends/friendship-actions"
 import { UserAvatar } from "@/components/profile/user-avatar"
+import { EmptyState } from "@/components/ui/empty-state"
 import type { FriendUser, FriendshipRelation } from "@/lib/friends/types"
 import type { LibraryEntryTile, LibraryLists } from "@/lib/library/types"
 import type { TopBookSlot } from "@/lib/users/top-books/types"
@@ -28,11 +29,11 @@ function ProfileCurrentlyReading({
 }) {
   if (!entry) {
     return (
-      <section className="space-y-2">
+      <section className="space-y-3">
         <h2 className="text-lg font-semibold tracking-tight">
           Currently reading
         </h2>
-        <p className="text-muted-foreground text-sm">{emptyLabel}</p>
+        <EmptyState title="Nothing in progress" description={emptyLabel} />
       </section>
     )
   }
@@ -79,7 +80,10 @@ function ProfileTopBooks({ slots }: { slots: TopBookSlot[] }) {
     <section className="space-y-4">
       <h2 className="text-lg font-semibold tracking-tight">Top 5</h2>
       {ordered.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No top books yet.</p>
+        <EmptyState
+          title="No top books yet"
+          description="They haven’t curated a Top 5 from finished books."
+        />
       ) : (
         <ol className="flex flex-wrap gap-x-3 gap-y-5 sm:gap-x-4">
           {ordered.map((slot) => (
@@ -118,7 +122,7 @@ function ProfileGrid({
         ) : null}
       </h2>
       {entries.length === 0 ? (
-        <p className="text-muted-foreground text-sm">{empty}</p>
+        <EmptyState title={`No ${title.toLowerCase()} books`} description={empty} />
       ) : (
         <div className="flex flex-wrap gap-x-3 gap-y-5 sm:gap-x-4 sm:gap-y-6">
           {entries.map((entry) => (
@@ -171,11 +175,7 @@ export function UserProfileView({
 
       <ProfileCurrentlyReading
         entry={lists.reading}
-        emptyLabel={
-          mode === "friend"
-            ? "Not reading anything right now."
-            : "Not reading anything right now."
-        }
+        emptyLabel="Not reading anything right now."
       />
 
       {mode === "friend" ? (

@@ -1,6 +1,7 @@
 "use client"
 
 import { PlusIcon, XIcon } from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState, useTransition } from "react"
 
@@ -105,7 +106,7 @@ export function TopBooksEditor({
 
   if (readBooks.length === 0) {
     return (
-      <section className="space-y-3">
+      <section className="space-y-4">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold tracking-tight">Top 5</h2>
           <p className="text-muted-foreground text-sm">
@@ -113,6 +114,22 @@ export function TopBooksEditor({
             profile.
           </p>
         </div>
+        <div className="flex flex-wrap gap-x-3 gap-y-5 sm:gap-x-4">
+          <div className="w-28 sm:w-32">
+            <div className="border-border bg-muted/40 flex aspect-[2/3] items-center justify-center rounded-md border border-dashed">
+              <PlusIcon className="text-muted-foreground size-8 opacity-50" />
+            </div>
+            <p className="text-muted-foreground mt-2 text-sm">Add book</p>
+          </div>
+        </div>
+        <p>
+          <Link
+            href="/books"
+            className="text-sm font-medium underline-offset-4 hover:underline"
+          >
+            Browse catalog to finish a book →
+          </Link>
+        </p>
       </section>
     )
   }

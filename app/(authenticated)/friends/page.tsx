@@ -62,7 +62,10 @@ export default async function Page({ searchParams }: PageProps) {
         <FriendshipList
           items={incoming}
           mode="incoming"
-          empty="No incoming friend requests."
+          empty={{
+            title: "No incoming requests",
+            description: "When someone sends you a friend request, it will show up here.",
+          }}
         />
       </section>
 
@@ -73,7 +76,10 @@ export default async function Page({ searchParams }: PageProps) {
         <FriendshipList
           items={outgoing}
           mode="outgoing"
-          empty="No pending sent requests."
+          empty={{
+            title: "No sent requests",
+            description: "Friend requests you send will appear here until they’re accepted.",
+          }}
         />
       </section>
 
@@ -82,7 +88,10 @@ export default async function Page({ searchParams }: PageProps) {
         <FriendshipList
           items={friends}
           mode="friends"
-          empty="No friends yet. Search for a username above."
+          empty={{
+            title: "No friends yet",
+            description: "Search for a username above to send your first friend request.",
+          }}
         />
       </section>
     </div>

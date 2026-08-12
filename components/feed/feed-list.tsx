@@ -1,40 +1,48 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import Link from "next/link"
 
 import { ActivityCard } from "@/components/feed/activity-card"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 import { loadMoreFeed } from "@/lib/activity/actions"
 import type { FeedActivityItem } from "@/lib/activity/types"
 
 type FeedListProps = {
   initialItems: FeedActivityItem[]
   initialCursor: string | null
+  friendCount: number
 }
 
-export function FeedList({ initialItems, initialCursor }: FeedListProps) {
+export function FeedList({
+  initialItems,
+  initialCursor,
+  friendCount,
+}: FeedListProps) {
   const [items, setItems] = useState(initialItems)
   const [cursor, setCursor] = useState(initialCursor)
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
   if (items.length === 0) {
+    if (friendCount === 0) {
+      return (
+        <EmptyState
+          className="my-4"
+          title="Your feed is quiet"
+          description="Add friends to see when they start reading, finish books, or leave ratings and reviews."
+          action={{ href: "/friends", label: "Find friends" }}
+        />
+      )
+    }
+
     return (
-      <div className="space-y-3 py-8">
-        <p className="text-muted-foreground text-sm">
-          No friend activity yet. When friends start reading, finish books, or
-          rate them, it will show up here.
-        </p>
-        <p>
-          <Link
-            href="/friends"
-            className="text-sm font-medium underline-offset-4 hover:underline"
-          >
-            Find friends →
-          </Link>
-        </p>
-      </div>
+      <EmptyState
+        className="my-4"
+        title="No activity yet"
+        description="Your friends haven’t started reading, finished a book, or left a rating yet. Check back soon."
+        action={{ href: "/friends", label: "View friends" }}
+      />
     )
   }
 

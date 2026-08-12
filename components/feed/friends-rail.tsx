@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { BookCover } from "@/components/catalog/book-cover"
 import { UserAvatar } from "@/components/profile/user-avatar"
+import { EmptyState } from "@/components/ui/empty-state"
 import type { FriendRailItem } from "@/lib/friends/types"
 
 type FriendsRailProps = {
@@ -96,12 +97,11 @@ export function FriendsRail({ friends, variant }: FriendsRailProps) {
           </Link>
         </div>
         {friends.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            No friends yet.{" "}
-            <Link href="/friends" className="underline underline-offset-4">
-              Find friends
-            </Link>
-          </p>
+          <EmptyState
+            title="No friends yet"
+            description="Find people by username to fill your feed."
+            action={{ href: "/friends", label: "Find friends" }}
+          />
         ) : (
           <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory">
             {friends.map((friend) => (
@@ -126,12 +126,11 @@ export function FriendsRail({ friends, variant }: FriendsRailProps) {
           </Link>
         </div>
         {friends.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            No friends yet.{" "}
-            <Link href="/friends" className="underline underline-offset-4">
-              Find friends
-            </Link>
-          </p>
+          <EmptyState
+            title="No friends yet"
+            description="Find people by username to fill your feed."
+            action={{ href: "/friends", label: "Find friends" }}
+          />
         ) : (
           <ul className="space-y-0.5">
             {friends.map((friend) => (

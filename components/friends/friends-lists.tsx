@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 
 import { FriendshipActions } from "@/components/friends/friendship-actions"
 import { UserAvatar } from "@/components/profile/user-avatar"
+import { EmptyState } from "@/components/ui/empty-state"
 import type {
   FriendshipWithUser,
   UserSearchHit,
@@ -37,9 +38,10 @@ function UserRow({
 export function FriendsSearchResults({ hits }: { hits: UserSearchHit[] }) {
   if (hits.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
-        No users found. Try a different username prefix.
-      </p>
+      <EmptyState
+        title="No users found"
+        description="Try a different username prefix (at least 2 characters)."
+      />
     )
   }
 
@@ -69,11 +71,21 @@ export function FriendshipList({
   mode,
 }: {
   items: FriendshipWithUser[]
-  empty: string
+  empty: {
+    title: string
+    description: string
+    action?: { href: string; label: string }
+  }
   mode: "incoming" | "outgoing" | "friends"
 }) {
   if (items.length === 0) {
-    return <p className="text-muted-foreground text-sm">{empty}</p>
+    return (
+      <EmptyState
+        title={empty.title}
+        description={empty.description}
+        action={empty.action}
+      />
+    )
   }
 
   return (
