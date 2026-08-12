@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 import { BookCover } from "@/components/catalog/book-cover"
 import { StarRatingDisplay } from "@/components/reviews/star-rating"
@@ -25,13 +25,23 @@ const STATUS_LABEL: Record<LibraryStatus, string> = {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
+  const session = await requireSession()
   const { username, bookId } = await params
+  if (username.trim().toLowerCase() === "you") {
+    return { title: "Review" }
+  }
+
   const [user, book] = await Promise.all([
     getUserByUsername(username),
     getBookById(bookId),
   ])
 
   if (!user || !book) return { title: "Review" }
+
+  const { relation } = await getFriendshipRelation(session.user.id, user.id)
+  if (relation !== "self" && relation !== "friends") {
+    return { title: "Review" }
+  }
 
   return {
     title: `${book.title} · @${user.username}`,
@@ -41,6 +51,12 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const session = await requireSession()
   const { username, bookId } = await params
+
+  if (username.trim().toLowerCase() === "you") {
+    const self = session.user.username
+    if (self) redirect(`/users/${self}/books/${bookId}`)
+    redirect("/profile")
+  }
 
   const user = await getUserByUsername(username)
   if (!user) notFound()

@@ -24,6 +24,9 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { username } = await params
+  if (username.trim().toLowerCase() === "you") {
+    return { title: "Profile" }
+  }
   const user = await getUserByUsername(username)
   return {
     title: user ? `@${user.username}` : "User",
@@ -73,6 +76,11 @@ async function getReadingTile(
 export default async function Page({ params }: PageProps) {
   const session = await requireSession()
   const { username } = await params
+
+  // Product alias: /users/you always means "my profile".
+  if (username.trim().toLowerCase() === "you") {
+    redirect("/profile")
+  }
 
   const user = await getUserByUsername(username)
   if (!user) notFound()

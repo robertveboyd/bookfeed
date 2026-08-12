@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm"
+import { asc, eq } from "drizzle-orm"
 import { z } from "zod"
 
 import { authorsForBookIds } from "@/lib/books/queries"
@@ -41,9 +41,28 @@ export async function removeTopBookForUserBook(
 ): Promise<void> {
   if (!z.uuid().safeParse(bookId).success) return
 
-  await db
-    .delete(userTopBooks)
-    .where(
-      and(eq(userTopBooks.userId, userId), eq(userTopBooks.bookId, bookId)),
-    )
+  const remaining = await db
+    .select({ bookId: userTopBooks.bookId })
+    .from(userTopBooks)
+    .where(eq(userTopBooks.userId, userId))
+    .orderBy(asc(userTopBooks.position))
+
+  const nextBookIds = remaining
+    .map((row) => row.bookId)
+    .filter((id) => id !== bookId)
+
+  // Rebuild slots so positions stay contiguous (PK is userId+position).
+  await db.delete(userTopBooks).where(eq(userTopBooks.userId, userId))
+
+  if (nextBookIds.length === 0) return
+
+  const now = new Date()
+  await db.insert(userTopBooks).values(
+    nextBookIds.map((id, index) => ({
+      userId,
+      bookId: id,
+      position: index + 1,
+      updatedAt: now,
+    })),
+  )
 }

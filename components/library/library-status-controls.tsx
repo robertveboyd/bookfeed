@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -43,6 +44,7 @@ export function LibraryStatusControls({
   canEdit = true,
   onStatusChange,
 }: LibraryStatusControlsProps) {
+  const router = useRouter()
   const [status, setStatus] = useState<LibraryStatus | null>(initialStatus)
   const [error, setError] = useState<string | null>(null)
   const [conflict, setConflict] = useState<ReadingConflict | null>(null)
@@ -74,6 +76,10 @@ export function LibraryStatusControls({
         setStatus(result.entry.status)
         setConflict(null)
         onStatusChange?.(result.entry.status)
+        // Conflict resolution also changes another book's status.
+        if (resolveReadingConflict) {
+          router.refresh()
+        }
         return
       }
 

@@ -98,17 +98,7 @@ export async function upsertReview(
         .where(eq(reviews.id, existing.id))
         .returning(reviewSelect)
 
-      // First time body appears → reviewed. Rating/body edits alone → no event.
-      if (!existing.body && body) {
-        await recordActivity({
-          actorId: userId,
-          type: "reviewed",
-          bookId,
-          reviewId: updated.id,
-          rating: updated.rating,
-        })
-      }
-
+      // Edits (including adding a body later) never emit feed events.
       revalidateReviewPaths(bookId, username)
       return { ok: true, review: updated }
     }
