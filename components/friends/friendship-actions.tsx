@@ -27,6 +27,8 @@ type FriendshipActionsProps = {
   relation: Exclude<FriendshipRelation, "self">
   friendshipId: string | null
   size?: "default" | "sm"
+  /** Stretch actions to container width (profile header on mobile). */
+  fullWidth?: boolean
 }
 
 export function FriendshipActions({
@@ -35,6 +37,7 @@ export function FriendshipActions({
   relation,
   friendshipId,
   size = "sm",
+  fullWidth = false,
 }: FriendshipActionsProps) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -55,8 +58,20 @@ export function FriendshipActions({
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <div className="flex flex-wrap justify-end gap-2">
+    <div
+      className={
+        fullWidth
+          ? "flex w-full flex-col items-stretch gap-1 sm:w-auto sm:items-end"
+          : "flex flex-col items-end gap-1"
+      }
+    >
+      <div
+        className={
+          fullWidth
+            ? "flex flex-wrap gap-2 sm:justify-end [&_button]:min-h-10 sm:[&_button]:min-h-9 [&_button]:flex-1 sm:[&_button]:flex-none"
+            : "flex flex-wrap justify-end gap-2"
+        }
+      >
         {relation === "none" ? (
           <Button
             type="button"

@@ -25,15 +25,15 @@ export default function Loading() {
           <div className="bg-muted h-6 w-16 animate-pulse rounded" />
           <div className="bg-muted h-4 w-64 max-w-full animate-pulse rounded" />
         </div>
-        <div className="flex flex-wrap gap-x-3 gap-y-5 sm:gap-x-4">
+        <div className="-mx-4 flex gap-3 overflow-hidden px-4 sm:mx-0 sm:flex-wrap sm:gap-x-4 sm:gap-y-5 sm:overflow-visible sm:px-0">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="w-28 space-y-2 sm:w-32">
+            <div key={i} className="w-24 shrink-0 space-y-2 sm:w-32">
               <div className="bg-muted aspect-[2/3] animate-pulse rounded-md" />
               <div className="bg-muted h-3 w-full animate-pulse rounded" />
               <div className="bg-muted h-3 w-2/3 animate-pulse rounded" />
             </div>
           ))}
-          <div className="w-28 sm:w-32">
+          <div className="w-24 shrink-0 sm:w-32">
             <div className="border-border bg-muted/40 aspect-[2/3] animate-pulse rounded-md border border-dashed" />
             <div className="bg-muted mt-2 h-3 w-16 animate-pulse rounded" />
           </div>

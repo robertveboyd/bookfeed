@@ -5,6 +5,7 @@ import { BookTile } from "@/components/catalog/book-tile"
 import { FriendshipActions } from "@/components/friends/friendship-actions"
 import { UserAvatar } from "@/components/profile/user-avatar"
 import { EmptyState } from "@/components/ui/empty-state"
+import { HorizontalScroller } from "@/components/ui/horizontal-scroller"
 import type { FriendUser, FriendshipRelation } from "@/lib/friends/types"
 import type { LibraryEntryTile, LibraryLists } from "@/lib/library/types"
 import type { TopBookSlot } from "@/lib/users/top-books/types"
@@ -30,7 +31,7 @@ function ProfileCurrentlyReading({
   if (!entry) {
     return (
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="text-base font-semibold tracking-tight sm:text-lg">
           Currently reading
         </h2>
         <EmptyState title="Nothing in progress" description={emptyLabel} />
@@ -42,12 +43,14 @@ function ProfileCurrentlyReading({
   const authorsLabel = book.authors.join(", ")
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-lg font-semibold tracking-tight">Currently reading</h2>
-      <div className="flex gap-4 sm:gap-6">
+    <section className="space-y-3 sm:space-y-4">
+      <h2 className="text-base font-semibold tracking-tight sm:text-lg">
+        Currently reading
+      </h2>
+      <div className="flex gap-3 sm:gap-6">
         <Link
           href={`/books/${book.id}`}
-          className="relative aspect-[2/3] w-28 shrink-0 overflow-hidden rounded-md bg-muted shadow-sm sm:w-32"
+          className="relative aspect-[2/3] w-24 shrink-0 overflow-hidden rounded-md bg-muted shadow-sm touch-manipulation sm:w-32"
         >
           <BookCover
             coverImageId={book.coverImageId}
@@ -56,7 +59,7 @@ function ProfileCurrentlyReading({
           />
         </Link>
         <div className="min-w-0 space-y-1 self-center">
-          <h3 className="text-xl font-semibold tracking-tight text-balance">
+          <h3 className="text-lg font-semibold tracking-tight text-balance sm:text-xl">
             <Link
               href={`/books/${book.id}`}
               className="hover:underline underline-offset-4"
@@ -77,24 +80,40 @@ function ProfileTopBooks({ slots }: { slots: TopBookSlot[] }) {
   const ordered = [...slots].sort((a, b) => a.position - b.position)
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-lg font-semibold tracking-tight">Top 5</h2>
+    <section className="space-y-3 sm:space-y-4">
+      <h2 className="text-base font-semibold tracking-tight sm:text-lg">Top 5</h2>
       {ordered.length === 0 ? (
         <EmptyState
           title="No top books yet"
           description="They haven’t curated a Top 5 from finished books."
         />
       ) : (
-        <ol className="flex flex-wrap gap-x-3 gap-y-5 sm:gap-x-4">
-          {ordered.map((slot) => (
-            <li key={slot.position} className="relative">
-              <span className="bg-background/90 text-muted-foreground absolute top-1.5 left-1.5 z-10 rounded px-1 text-[10px] font-medium tabular-nums ring-1 ring-border">
-                #{slot.position}
-              </span>
-              <BookTile book={slot.book} size="md" />
-            </li>
-          ))}
-        </ol>
+        <>
+          {/* Mobile: swipeable row */}
+          <div className="sm:hidden">
+            <HorizontalScroller bleed aria-label="Top 5 books">
+              {ordered.map((slot) => (
+                <div key={slot.position} role="listitem" className="relative shrink-0">
+                  <span className="bg-background/90 text-muted-foreground absolute top-1.5 left-1.5 z-10 rounded px-1 text-[10px] font-medium tabular-nums ring-1 ring-border">
+                    #{slot.position}
+                  </span>
+                  <BookTile book={slot.book} size="sm" />
+                </div>
+              ))}
+            </HorizontalScroller>
+          </div>
+          {/* Desktop: wrap */}
+          <ol className="hidden flex-wrap gap-x-3 gap-y-5 sm:flex sm:gap-x-4">
+            {ordered.map((slot) => (
+              <li key={slot.position} className="relative">
+                <span className="bg-background/90 text-muted-foreground absolute top-1.5 left-1.5 z-10 rounded px-1 text-[10px] font-medium tabular-nums ring-1 ring-border">
+                  #{slot.position}
+                </span>
+                <BookTile book={slot.book} size="md" />
+              </li>
+            ))}
+          </ol>
+        </>
       )}
     </section>
   )
@@ -112,8 +131,8 @@ function ProfileGrid({
   tileSize?: "sm" | "md"
 }) {
   return (
-    <section className="space-y-4">
-      <h2 className="text-lg font-semibold tracking-tight">
+    <section className="space-y-3 sm:space-y-4">
+      <h2 className="text-base font-semibold tracking-tight sm:text-lg">
         {title}
         {entries.length > 0 ? (
           <span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">
@@ -122,13 +141,27 @@ function ProfileGrid({
         ) : null}
       </h2>
       {entries.length === 0 ? (
-        <EmptyState title={`No ${title.toLowerCase()} books`} description={empty} />
+        <EmptyState
+          title={`No ${title.toLowerCase()} books`}
+          description={empty}
+        />
       ) : (
-        <div className="flex flex-wrap gap-x-3 gap-y-5 sm:gap-x-4 sm:gap-y-6">
-          {entries.map((entry) => (
-            <BookTile key={entry.id} book={entry.book} size={tileSize} />
-          ))}
-        </div>
+        <>
+          <div className="sm:hidden">
+            <HorizontalScroller bleed aria-label={title}>
+              {entries.map((entry) => (
+                <div key={entry.id} role="listitem" className="shrink-0">
+                  <BookTile book={entry.book} size="sm" />
+                </div>
+              ))}
+            </HorizontalScroller>
+          </div>
+          <div className="hidden flex-wrap gap-x-3 gap-y-5 sm:flex sm:gap-x-4 sm:gap-y-6">
+            {entries.map((entry) => (
+              <BookTile key={entry.id} book={entry.book} size={tileSize} />
+            ))}
+          </div>
+        </>
       )}
     </section>
   )
@@ -143,20 +176,20 @@ export function UserProfileView({
   topBooks,
 }: UserProfileViewProps) {
   return (
-    <div className="mx-auto max-w-4xl space-y-10">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
+    <div className="mx-auto max-w-4xl space-y-8 sm:space-y-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <UserAvatar
             userId={user.id}
             username={user.username}
             imageUrl={user.image}
-            size={80}
+            size={64}
           />
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">
+          <div className="min-w-0 space-y-1">
+            <h1 className="truncate text-xl font-semibold tracking-tight sm:text-2xl">
               @{user.username}
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm text-pretty">
               {mode === "friend"
                 ? "You’re friends — here’s their library."
                 : "Add them as a friend to see their full library."}
@@ -164,13 +197,16 @@ export function UserProfileView({
           </div>
         </div>
 
-        <FriendshipActions
-          userId={user.id}
-          username={user.username}
-          relation={relation}
-          friendshipId={friendshipId}
-          size="default"
-        />
+        <div className="w-full sm:w-auto sm:shrink-0">
+          <FriendshipActions
+            userId={user.id}
+            username={user.username}
+            relation={relation}
+            friendshipId={friendshipId}
+            size="default"
+            fullWidth
+          />
+        </div>
       </div>
 
       <ProfileCurrentlyReading

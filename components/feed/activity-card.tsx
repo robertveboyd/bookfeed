@@ -22,7 +22,7 @@ export function ActivityCard({ item }: ActivityCardProps) {
 
   return (
     <article className="flex gap-3 border-b border-border py-4 last:border-b-0">
-      <Link href={profileHref} className="shrink-0 self-start">
+      <Link href={profileHref} className="shrink-0 self-start touch-manipulation">
         <UserAvatar
           userId={actor.id}
           username={actor.username}
@@ -32,8 +32,8 @@ export function ActivityCard({ item }: ActivityCardProps) {
       </Link>
 
       <div className="min-w-0 flex-1 space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-sm leading-relaxed text-pretty">
+        <div className="flex items-start justify-between gap-2 sm:gap-3">
+          <p className="min-w-0 text-sm leading-relaxed text-pretty">
             <Link
               href={profileHref}
               className="font-medium hover:underline underline-offset-4"
@@ -93,7 +93,7 @@ export function ActivityCard({ item }: ActivityCardProps) {
           </p>
           <RelativeTime
             date={item.createdAt}
-            className="text-muted-foreground shrink-0 text-xs"
+            className="text-muted-foreground mt-0.5 shrink-0 text-[11px] sm:text-xs"
           />
         </div>
 

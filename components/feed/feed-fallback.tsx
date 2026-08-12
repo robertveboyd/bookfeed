@@ -11,14 +11,14 @@ export function FeedFallback() {
           <div className="bg-muted h-4 w-16 animate-pulse rounded" />
           <div className="bg-muted h-3 w-20 animate-pulse rounded" />
         </div>
-        <div className="flex gap-3 overflow-hidden">
+        <div className="-mx-4 flex gap-3 overflow-hidden px-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="flex w-20 shrink-0 flex-col items-center gap-1.5"
+              className="flex w-[4.5rem] shrink-0 flex-col items-center gap-1.5"
             >
               <div className="bg-muted size-12 animate-pulse rounded-full" />
-              <div className="bg-muted h-3 w-14 animate-pulse rounded" />
+              <div className="bg-muted h-3 w-12 animate-pulse rounded" />
             </div>
           ))}
         </div>

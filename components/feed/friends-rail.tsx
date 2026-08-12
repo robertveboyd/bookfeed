@@ -3,6 +3,7 @@ import Link from "next/link"
 import { BookCover } from "@/components/catalog/book-cover"
 import { UserAvatar } from "@/components/profile/user-avatar"
 import { EmptyState } from "@/components/ui/empty-state"
+import { HorizontalScroller } from "@/components/ui/horizontal-scroller"
 import type { FriendRailItem } from "@/lib/friends/types"
 
 type FriendsRailProps = {
@@ -24,9 +25,9 @@ function FriendItem({
     return (
       <Link
         href={href}
-        className="flex w-20 shrink-0 flex-col items-center gap-1.5 snap-start"
+        className="flex w-[4.5rem] shrink-0 flex-col items-center gap-1.5 snap-start touch-manipulation sm:w-20"
       >
-        <div className="relative">
+        <div className="relative size-12 sm:size-[3rem]">
           <UserAvatar
             userId={friend.id}
             username={friend.username}
@@ -45,8 +46,8 @@ function FriendItem({
             </span>
           ) : null}
         </div>
-        <span className="w-full truncate text-center text-xs">
-          @{friend.username}
+        <span className="w-full truncate text-center text-[11px] leading-tight sm:text-xs">
+          {friend.username}
         </span>
       </Link>
     )
@@ -87,11 +88,11 @@ export function FriendsRail({ friends, variant }: FriendsRailProps) {
   if (variant === "chips") {
     return (
       <section className="space-y-3 lg:hidden">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 px-0">
           <h2 className="text-sm font-medium tracking-tight">Friends</h2>
           <Link
             href="/friends"
-            className="text-muted-foreground hover:text-foreground text-xs underline-offset-4 hover:underline"
+            className="text-muted-foreground hover:text-foreground min-h-9 inline-flex items-center text-xs underline-offset-4 hover:underline"
           >
             Find friends
           </Link>
@@ -103,11 +104,13 @@ export function FriendsRail({ friends, variant }: FriendsRailProps) {
             action={{ href: "/friends", label: "Find friends" }}
           />
         ) : (
-          <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory">
+          <HorizontalScroller bleed aria-label="Friends">
             {friends.map((friend) => (
-              <FriendItem key={friend.id} friend={friend} variant="chips" />
+              <div key={friend.id} role="listitem">
+                <FriendItem friend={friend} variant="chips" />
+              </div>
             ))}
-          </div>
+          </HorizontalScroller>
         )}
       </section>
     )
