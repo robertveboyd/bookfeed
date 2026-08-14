@@ -56,6 +56,10 @@ export function FeedFallback() {
                   <div className="bg-muted h-3 w-10 shrink-0 animate-pulse rounded" />
                 </div>
                 <div className="bg-muted aspect-[2/3] w-16 animate-pulse rounded-md sm:w-20" />
+                <div className="flex gap-3 pt-1">
+                  <div className="bg-muted h-5 w-12 animate-pulse rounded" />
+                  <div className="bg-muted h-5 w-12 animate-pulse rounded" />
+                </div>
               </div>
             </div>
           ))}

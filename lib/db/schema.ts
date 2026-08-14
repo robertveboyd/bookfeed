@@ -14,7 +14,7 @@ import {
 
 import { FRIENDSHIP_STATUSES } from "@/lib/friends/types"
 import { LIBRARY_STATUSES } from "@/lib/library/types"
-import { ACTIVITY_TYPES } from "@/lib/activity/types"
+import { ACTIVITY_TYPES, COMMENT_BODY_MAX } from "@/lib/activity/types"
 
 export const UsersUnique = {
   email: "users_email_unique",
@@ -245,6 +245,91 @@ export const activities = pgTable(
       "activities_rating_range",
       sql`${t.rating} IS NULL OR (${t.rating} >= 1 AND ${t.rating} <= 5)`,
     ),
+  ],
+)
+
+export const ActivityLikesUnique = {
+  activityUser: "activity_likes_activity_id_user_id_pk",
+} as const
+
+export const activityLikes = pgTable(
+  "activity_likes",
+  {
+    activityId: uuid("activity_id")
+      .notNull()
+      .references(() => activities.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    primaryKey({
+      name: ActivityLikesUnique.activityUser,
+      columns: [t.activityId, t.userId],
+    }),
+    index("activity_likes_user_id_idx").on(t.userId),
+  ],
+)
+
+export const activityComments = pgTable(
+  "activity_comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    activityId: uuid("activity_id")
+      .notNull()
+      .references(() => activities.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
+    deletedById: uuid("deleted_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    check(
+      "activity_comments_body_length",
+      sql`char_length(${t.body}) > 0 AND char_length(${t.body}) <= ${sql.raw(String(COMMENT_BODY_MAX))}`,
+    ),
+    index("activity_comments_activity_id_created_at_idx").on(
+      t.activityId,
+      t.createdAt,
+      t.id,
+    ),
+    index("activity_comments_author_id_idx").on(t.authorId),
+  ],
+)
+
+export const CommentLikesUnique = {
+  commentUser: "comment_likes_comment_id_user_id_pk",
+} as const
+
+export const commentLikes = pgTable(
+  "comment_likes",
+  {
+    commentId: uuid("comment_id")
+      .notNull()
+      .references(() => activityComments.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    primaryKey({
+      name: CommentLikesUnique.commentUser,
+      columns: [t.commentId, t.userId],
+    }),
+    index("comment_likes_user_id_idx").on(t.userId),
   ],
 )
 
