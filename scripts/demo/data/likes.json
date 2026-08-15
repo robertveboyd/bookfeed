@@ -1,0 +1,80 @@
+[
+  {
+    "username": "maya",
+    "title": "Dune",
+    "type": "reviewed",
+    "likedBy": ["robert", "jordan", "sam", "ravi"]
+  },
+  {
+    "username": "jordan",
+    "title": "Pachinko",
+    "type": "reviewed",
+    "likedBy": ["robert", "harper", "priya"]
+  },
+  {
+    "username": "robert",
+    "title": "Dune",
+    "type": "reviewed",
+    "likedBy": ["maya", "sam"]
+  },
+  {
+    "username": "lena",
+    "title": "The Seven Husbands of Evelyn Hugo",
+    "type": "reviewed",
+    "likedBy": ["zoe", "priya", "robert"]
+  },
+  {
+    "username": "sage",
+    "title": "The Haunting of Hill House",
+    "type": "reviewed",
+    "likedBy": ["nico", "priya"]
+  },
+  {
+    "username": "sam",
+    "title": "Foundation",
+    "type": "reviewed",
+    "likedBy": ["maya", "robert"]
+  },
+  {
+    "username": "harper",
+    "title": "All the Light We Cannot See",
+    "type": "reviewed",
+    "likedBy": ["jordan", "robert"]
+  },
+  {
+    "username": "ravi",
+    "title": "The Lord of the Rings",
+    "type": "reviewed",
+    "likedBy": ["robert", "maya"]
+  },
+  {
+    "username": "nico",
+    "title": "Mexican Gothic",
+    "type": "reviewed",
+    "likedBy": ["sage"]
+  },
+  {
+    "username": "zoe",
+    "title": "Pride and Prejudice",
+    "type": "reviewed",
+    "likedBy": ["lena", "robert"]
+  },
+  {
+    "username": "maya",
+    "title": "Hyperion",
+    "type": "started_reading",
+    "likedBy": ["robert", "sam"]
+  },
+  {
+    "username": "lena",
+    "title": "Fourth Wing",
+    "type": "started_reading",
+    "likedBy": ["zoe"]
+  },
+  {
+    "username": "miles",
+    "title": "The Big Sleep",
+    "type": "started_reading",
+    "likedBy": ["priya"]
+  }
+]

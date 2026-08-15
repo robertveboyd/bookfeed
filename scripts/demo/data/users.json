@@ -1,0 +1,75 @@
+[
+  {
+    "username": "robert",
+    "email": "robert.ve.boyd@gmail.com",
+    "name": "Robert Boyd",
+    "bio": "Always in the middle of something. Ask me what I’m reading.",
+    "showcase": true
+  },
+  {
+    "username": "maya",
+    "email": "maya@bookfeed.local",
+    "name": "Maya Patel",
+    "bio": "Sci-fi first, everything else second."
+  },
+  {
+    "username": "jordan",
+    "email": "jordan@bookfeed.local",
+    "name": "Jordan Kim",
+    "bio": "Historical fiction and doorstoppers."
+  },
+  {
+    "username": "priya",
+    "email": "priya@bookfeed.local",
+    "name": "Priya Shah",
+    "bio": "Dark academia, mysteries, and a little romance."
+  },
+  {
+    "username": "sam",
+    "email": "sam@bookfeed.local",
+    "name": "Sam Okonkwo",
+    "bio": "Space, systems, and the occasional comfort reread."
+  },
+  {
+    "username": "lena",
+    "email": "lena@bookfeed.local",
+    "name": "Lena Voss",
+    "bio": "Dragons, romance, and whatever’s on the nightstand."
+  },
+  {
+    "username": "nico",
+    "email": "nico@bookfeed.local",
+    "name": "Nico Alvarez",
+    "bio": "Horror until it’s too late to sleep."
+  },
+  {
+    "username": "harper",
+    "email": "harper@bookfeed.local",
+    "name": "Harper Quinn",
+    "bio": "War stories, quiet novels, rainy-day reading."
+  },
+  {
+    "username": "ravi",
+    "email": "ravi@bookfeed.local",
+    "name": "Ravi Mehta",
+    "bio": "Epic fantasy is a personality."
+  },
+  {
+    "username": "sage",
+    "email": "sage@bookfeed.local",
+    "name": "Sage Okada",
+    "bio": "Gothic houses and unreliable narrators."
+  },
+  {
+    "username": "miles",
+    "email": "miles@bookfeed.local",
+    "name": "Miles Brennan",
+    "bio": "Detectives, rain, and last-page twists."
+  },
+  {
+    "username": "zoe",
+    "email": "zoe@bookfeed.local",
+    "name": "Zoe Hart",
+    "bio": "Romance with a side of contemporary chaos."
+  }
+]

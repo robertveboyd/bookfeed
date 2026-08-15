@@ -11,7 +11,9 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "db:drop": "pnpm dlx tsx --env-file=.env.local scripts/drop-db.ts",
     "db:seed": "pnpm dlx tsx --env-file=.env.local scripts/seed-catalog.ts",
+    "db:seed:demo": "pnpm db:drop && pnpm db:push && pnpm db:seed && pnpm dlx tsx --env-file=.env.local scripts/demo/seed.ts",
     "covers:fetch": "pnpm dlx tsx scripts/fetch-covers.ts"
   },
   "dependencies": {
