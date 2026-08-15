@@ -56,6 +56,18 @@ export default async function Page({ searchParams }: PageProps) {
       </section>
 
       <section className="space-y-4">
+        <h2 className="text-lg font-medium tracking-tight">Your friends</h2>
+        <FriendshipList
+          items={friends}
+          mode="friends"
+          empty={{
+            title: "No friends yet",
+            description: "Search for a username above to send your first friend request.",
+          }}
+        />
+      </section>
+
+      <section className="space-y-4">
         <h2 className="text-lg font-medium tracking-tight">
           Incoming requests
         </h2>
@@ -79,18 +91,6 @@ export default async function Page({ searchParams }: PageProps) {
           empty={{
             title: "No sent requests",
             description: "Friend requests you send will appear here until they’re accepted.",
-          }}
-        />
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-lg font-medium tracking-tight">Your friends</h2>
-        <FriendshipList
-          items={friends}
-          mode="friends"
-          empty={{
-            title: "No friends yet",
-            description: "Search for a username above to send your first friend request.",
           }}
         />
       </section>
