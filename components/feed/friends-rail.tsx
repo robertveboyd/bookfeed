@@ -4,6 +4,7 @@ import { BookCover } from "@/components/catalog/book-cover"
 import { UserAvatar } from "@/components/profile/user-avatar"
 import { EmptyState } from "@/components/ui/empty-state"
 import { HorizontalScroller } from "@/components/ui/horizontal-scroller"
+import { FriendHoverCard } from "@/components/users/friend-hover-card"
 import type { FriendRailItem } from "@/lib/friends/types"
 
 type FriendsRailProps = {
@@ -19,13 +20,11 @@ function FriendItem({
   friend: FriendRailItem
   variant: "rail" | "chips"
 }) {
-  const href = `/users/${friend.username}`
-
   if (variant === "chips") {
     return (
-      <Link
-        href={href}
-        className="flex w-[4.5rem] shrink-0 flex-col items-center gap-1.5 snap-start touch-manipulation sm:w-20"
+      <FriendHoverCard
+        user={friend}
+        className="flex w-[4.5rem] shrink-0 flex-col items-center gap-1.5 snap-start sm:w-20"
       >
         <div className="relative size-12 sm:size-[3rem]">
           <UserAvatar
@@ -49,13 +48,13 @@ function FriendItem({
         <span className="w-full truncate text-center text-[11px] leading-tight sm:text-xs">
           {friend.username}
         </span>
-      </Link>
+      </FriendHoverCard>
     )
   }
 
   return (
-    <Link
-      href={href}
+    <FriendHoverCard
+      user={friend}
       className="flex items-center gap-2.5 rounded-lg px-1 py-1.5 hover:bg-muted/60"
     >
       <div className="relative shrink-0">
@@ -80,7 +79,7 @@ function FriendItem({
       <span className="min-w-0 truncate text-sm font-medium">
         @{friend.username}
       </span>
-    </Link>
+    </FriendHoverCard>
   )
 }
 

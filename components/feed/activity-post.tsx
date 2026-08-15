@@ -5,6 +5,7 @@ import { BookCover } from "@/components/catalog/book-cover"
 import { RelativeTime } from "@/components/feed/relative-time"
 import { UserAvatar } from "@/components/profile/user-avatar"
 import { StarRatingDisplay } from "@/components/reviews/star-rating"
+import { FriendHoverCard } from "@/components/users/friend-hover-card"
 import { excerptText } from "@/lib/activity/format"
 import {
   REVIEW_EXCERPT_MAX,
@@ -20,15 +21,14 @@ type ActivityPostProps = {
 
 export function ActivityPost({ item, footer, className }: ActivityPostProps) {
   const { actor, book, type } = item
-  const profileHref = `/users/${actor.username}`
   const bookHref = `/books/${book.id}`
   const takeHref = `/users/${actor.username}/books/${book.id}`
 
   return (
     <div className={cn("flex gap-3", className)}>
-      <Link
-        href={profileHref}
-        className="shrink-0 self-start touch-manipulation"
+      <FriendHoverCard
+        user={actor}
+        className="shrink-0 self-start"
       >
         <UserAvatar
           userId={actor.id}
@@ -36,17 +36,17 @@ export function ActivityPost({ item, footer, className }: ActivityPostProps) {
           imageUrl={actor.image}
           size={40}
         />
-      </Link>
+      </FriendHoverCard>
 
       <div className="min-w-0 flex-1 space-y-2">
         <div className="flex items-start justify-between gap-2 sm:gap-3">
           <p className="min-w-0 text-sm leading-relaxed text-pretty">
-            <Link
-              href={profileHref}
+            <FriendHoverCard
+              user={actor}
               className="font-medium hover:underline underline-offset-4"
             >
               @{actor.username}
-            </Link>{" "}
+            </FriendHoverCard>{" "}
             {type === "started_reading" ? (
               <>
                 started reading{" "}
