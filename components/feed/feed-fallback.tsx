@@ -24,7 +24,7 @@ export function FeedFallback() {
         </div>
       </section>
 
-      <div className="flex gap-10">
+      <div className="flex gap-8 lg:gap-10">
         <aside className="hidden w-52 shrink-0 space-y-3 lg:block xl:w-56">
           <div className="flex items-center justify-between gap-2">
             <div className="bg-muted h-4 w-16 animate-pulse rounded" />
@@ -40,23 +40,22 @@ export function FeedFallback() {
           </ul>
         </aside>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 w-full max-w-2xl">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="flex gap-3 border-b border-border py-4 last:border-b-0"
+              className="flex items-stretch gap-3 border-b border-border py-5 last:border-b-0 sm:gap-4"
             >
-              <div className="bg-muted size-10 shrink-0 animate-pulse rounded-full" />
-              <div className="min-w-0 flex-1 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-2">
-                    <div className="bg-muted h-4 w-56 max-w-full animate-pulse rounded" />
-                    <div className="bg-muted h-3 w-40 max-w-full animate-pulse rounded" />
-                  </div>
-                  <div className="bg-muted h-3 w-10 shrink-0 animate-pulse rounded" />
+              <div className="bg-muted aspect-[2/3] w-[4.5rem] shrink-0 animate-pulse rounded-md sm:w-24" />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="bg-muted size-7 shrink-0 animate-pulse rounded-full" />
+                  <div className="bg-muted h-4 w-40 max-w-full animate-pulse rounded" />
+                  <div className="bg-muted ml-auto h-3 w-10 shrink-0 animate-pulse rounded" />
                 </div>
-                <div className="bg-muted aspect-[2/3] w-16 animate-pulse rounded-md sm:w-20" />
-                <div className="flex gap-3 pt-1">
+                <div className="bg-muted h-5 w-48 max-w-full animate-pulse rounded" />
+                <div className="bg-muted h-3 w-28 max-w-full animate-pulse rounded" />
+                <div className="mt-auto flex gap-3 pt-1">
                   <div className="bg-muted h-5 w-12 animate-pulse rounded" />
                   <div className="bg-muted h-5 w-12 animate-pulse rounded" />
                 </div>

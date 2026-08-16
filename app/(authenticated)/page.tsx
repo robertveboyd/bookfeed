@@ -31,10 +31,10 @@ async function FeedContent() {
 
       <FriendsRail friends={friends} variant="chips" />
 
-      <div className="flex gap-10">
+      <div className="flex gap-8 lg:gap-10">
         <FriendsRail friends={friends} variant="rail" />
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 w-full max-w-2xl">
           <FeedList
             initialItems={feed.items}
             initialCursor={feed.nextCursor}

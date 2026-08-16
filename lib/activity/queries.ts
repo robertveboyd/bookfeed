@@ -20,6 +20,7 @@ import type {
   FeedCursor,
   FeedPage,
 } from "@/lib/activity/types"
+import { authorsForBookIds } from "@/lib/books/queries"
 import { db } from "@/lib/db"
 import {
   activities,
@@ -434,6 +435,7 @@ export async function listFriendsFeed(
 
   const hasMore = rows.length > limit
   const pageRows = hasMore ? rows.slice(0, limit) : rows
+  const authorMap = await authorsForBookIds(pageRows.map((row) => row.bookId))
 
   const items = await attachFeedEngagement(
     viewerId,
@@ -452,6 +454,7 @@ export async function listFriendsFeed(
         id: row.bookId,
         title: row.bookTitle,
         coverImageId: row.bookCoverImageId,
+        authors: authorMap.get(row.bookId) ?? [],
       },
     })),
   )

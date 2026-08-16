@@ -35,6 +35,7 @@ export type FeedBook = {
   id: string
   title: string
   coverImageId: string
+  authors: string[]
 }
 
 export type FeedActivityItem = {
