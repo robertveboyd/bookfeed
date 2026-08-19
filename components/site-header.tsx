@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { BrandMark } from "@/components/brand-mark"
 import { UserMenu, type HeaderUser } from "@/components/auth/user-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
 import {
@@ -33,8 +34,9 @@ export default function SiteHeader({ user }: { user: HeaderUser }) {
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4">
         <Link
           href="/"
-          className="font-semibold tracking-tight text-foreground"
+          className="inline-flex items-center gap-2 font-semibold tracking-tight text-foreground"
         >
+          <BrandMark />
           Bookfeed
         </Link>
 

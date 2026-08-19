@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { BrandMark } from "@/components/brand-mark"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 type AuthShellProps = {
@@ -48,7 +49,11 @@ export function AuthShell({
         <div className="animate-in fade-in slide-in-from-bottom-3 w-full max-w-md space-y-8 duration-500 ease-out fill-mode-both motion-reduce:animate-none">
           <div className="space-y-3">
             <p className="text-3xl font-semibold tracking-tight">
-              <Link href="/sign-in" className="hover:opacity-80">
+              <Link
+                href="/sign-in"
+                className="inline-flex items-center gap-2.5 hover:opacity-80"
+              >
+                <BrandMark className="size-9" />
                 Bookfeed
               </Link>
             </p>
