@@ -31,7 +31,7 @@ export default async function Layout({
   return (
     <>
       <SiteHeader user={headerUser} />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8">
         {children}
       </main>
     </>

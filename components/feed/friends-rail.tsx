@@ -1,9 +1,12 @@
+import Link from "next/link"
+
 import { BookCover } from "@/components/catalog/book-cover"
 import { UserAvatar } from "@/components/profile/user-avatar"
-import { EmptyState } from "@/components/ui/empty-state"
+import { buttonVariants } from "@/components/ui/button"
 import { HorizontalScroller } from "@/components/ui/horizontal-scroller"
 import { FriendHoverCard } from "@/components/users/friend-hover-card"
 import type { FriendRailItem } from "@/lib/friends/types"
+import { cn } from "@/lib/utils"
 
 type FriendsRailProps = {
   friends: FriendRailItem[]
@@ -43,13 +46,21 @@ function FriendItem({ friend }: { friend: FriendRailItem }) {
   )
 }
 
-function FriendsEmpty() {
+function FriendsEmpty({ className }: { className?: string }) {
   return (
-    <EmptyState
-      title="No friends yet"
-      description="Find people by username to fill your feed."
-      action={{ href: "/friends", label: "Find friends" }}
-    />
+    <div
+      className={cn(
+        "flex items-center justify-center rounded-xl border border-dashed border-border/80 px-4 py-6",
+        className,
+      )}
+    >
+      <Link
+        href="/friends"
+        className={buttonVariants({ variant: "default", size: "lg" })}
+      >
+        Find friends
+      </Link>
+    </div>
   )
 }
 
@@ -58,7 +69,7 @@ export function FriendsRail({ friends, variant }: FriendsRailProps) {
     return (
       <section className="lg:hidden">
         {friends.length === 0 ? (
-          <FriendsEmpty />
+          <FriendsEmpty className="min-h-28" />
         ) : (
           <HorizontalScroller bleed aria-label="Friends">
             {friends.map((friend) => (
@@ -77,11 +88,16 @@ export function FriendsRail({ friends, variant }: FriendsRailProps) {
   }
 
   return (
-    <aside className="hidden w-52 shrink-0 lg:block xl:w-64">
-      <div className="sticky top-20">
-        {friends.length === 0 ? (
-          <FriendsEmpty />
-        ) : (
+    <aside
+      className={cn(
+        "hidden w-52 shrink-0 xl:w-64",
+        friends.length === 0 ? "lg:flex lg:min-h-0 lg:flex-col" : "lg:block",
+      )}
+    >
+      {friends.length === 0 ? (
+        <FriendsEmpty className="min-h-0 flex-1" />
+      ) : (
+        <div className="sticky top-20">
           <ul className="grid grid-cols-2 gap-x-2 gap-y-4 xl:grid-cols-3">
             {friends.map((friend) => (
               <li key={friend.id} className="min-w-0">
@@ -89,8 +105,8 @@ export function FriendsRail({ friends, variant }: FriendsRailProps) {
               </li>
             ))}
           </ul>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
   )
 }

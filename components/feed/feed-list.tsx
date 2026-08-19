@@ -35,17 +35,16 @@ export function FeedList({
     if (friendCount === 0) {
       return (
         <EmptyState
-          className="my-4"
+          className="min-h-0 flex-1 items-center justify-center text-center"
           title="Your feed is quiet"
           description="Add friends to see what they’re reading — you can like and comment on their updates. Your own reading will show up here too."
-          action={{ href: "/friends", label: "Find friends" }}
         />
       )
     }
 
     return (
         <EmptyState
-          className="my-4"
+          className="min-h-0 flex-1 items-center justify-center text-center"
           title="No activity yet"
           description="When you or your friends start a book, finish one, or leave a rating, it’ll show up here — ready to like and comment."
           action={{ href: "/friends", label: "View friends" }}

@@ -21,7 +21,7 @@ async function FeedContent() {
   ])
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-1 flex-col gap-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Feed</h1>
         <p className="text-muted-foreground text-sm">
@@ -31,10 +31,10 @@ async function FeedContent() {
 
       <FriendsRail friends={friends} variant="chips" />
 
-      <div className="flex gap-8 lg:gap-10">
+      <div className="flex min-h-0 flex-1 gap-8 lg:gap-10">
         <FriendsRail friends={friends} variant="rail" />
 
-        <div className="min-w-0 w-full max-w-2xl">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <FeedList
             initialItems={feed.items}
             initialCursor={feed.nextCursor}
