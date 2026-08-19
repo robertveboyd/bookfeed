@@ -6,7 +6,11 @@ import { cn } from "@/lib/utils"
 type EmptyStateProps = {
   title: string
   description: string
-  action?: { href: string; label: string }
+  action?: {
+    href: string
+    label: string
+    variant?: "default" | "outline"
+  }
   className?: string
 }
 
@@ -30,7 +34,10 @@ export function EmptyState({
       {action ? (
         <Link
           href={action.href}
-          className={buttonVariants({ variant: "outline", size: "sm" })}
+          className={buttonVariants({
+            variant: action.variant ?? "outline",
+            size: "sm",
+          })}
         >
           {action.label}
         </Link>

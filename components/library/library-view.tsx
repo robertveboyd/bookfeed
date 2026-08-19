@@ -5,6 +5,7 @@ import { BookCover } from "@/components/catalog/book-cover"
 import { BookTile } from "@/components/catalog/book-tile"
 import { TopBooksEditor } from "@/components/library/top-books-editor"
 import { buttonVariants } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 import type { BookTile as BookTileData } from "@/lib/books/types"
 import type { LibraryEntryTile, LibraryLists } from "@/lib/library/types"
 import type { TopBookSlot } from "@/lib/users/top-books/types"
@@ -201,15 +202,25 @@ function LibraryGridSection({
 
 function FullyEmptyLibrary() {
   return (
-    <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-16 text-center">
-      <div className="space-y-2">
+    <div className="flex min-h-0 flex-1 flex-col gap-6">
+      <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Your library</h1>
-        <p className="text-muted-foreground text-sm text-pretty">
-          Save books you&apos;re curious about, track what you&apos;re reading,
-          and keep a history of finished titles.
+        <p className="text-muted-foreground text-sm">
+          What you&apos;re reading, what you&apos;ve finished, and what&apos;s
+          next.
         </p>
       </div>
-      <CatalogCta label="Explore the catalog" />
+
+      <EmptyState
+        className="min-h-0 flex-1 items-center justify-center text-center"
+        title="Your library is empty"
+        description="Save books you’re curious about, track what you’re reading, and keep a history of finished titles."
+        action={{
+          href: "/books",
+          label: "Explore the catalog",
+          variant: "default",
+        }}
+      />
     </div>
   )
 }
