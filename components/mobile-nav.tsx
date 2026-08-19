@@ -3,7 +3,15 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState, useTransition } from "react"
-import { LogOutIcon, MenuIcon, UserIcon } from "lucide-react"
+import {
+  BookOpenIcon,
+  LibraryIcon,
+  LogOutIcon,
+  MenuIcon,
+  NewspaperIcon,
+  UserIcon,
+  UsersIcon,
+} from "lucide-react"
 
 import { type HeaderUser } from "@/components/auth/user-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -19,7 +27,16 @@ import {
 import { signOutAction } from "@/lib/auth/actions/sign-out"
 import { cn } from "@/lib/utils"
 
+import type { LucideIcon } from "lucide-react"
+
 type NavLink = { href: string; label: string }
+
+const navIcons: Record<string, LucideIcon> = {
+  "/": NewspaperIcon,
+  "/books": BookOpenIcon,
+  "/library": LibraryIcon,
+  "/friends": UsersIcon,
+}
 
 type MobileNavProps = {
   user: HeaderUser
@@ -58,21 +75,25 @@ export function MobileNav({ user, links, isActive }: MobileNavProps) {
         </SheetHeader>
 
         <nav aria-label="Main" className="flex flex-col p-2">
-          {links.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              aria-current={isActive(href) ? "page" : undefined}
-              className={cn(
-                "rounded-lg px-3 py-2.5 text-sm font-medium",
-                isActive(href)
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-              )}
-            >
-              {label}
-            </Link>
-          ))}
+          {links.map(({ href, label }) => {
+            const Icon = navIcons[href]
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={isActive(href) ? "page" : undefined}
+                className={cn(
+                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium",
+                  isActive(href)
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                )}
+              >
+                {Icon ? <Icon className="size-4" /> : null}
+                {label}
+              </Link>
+            )
+          })}
         </nav>
 
         <Separator />
@@ -92,12 +113,7 @@ export function MobileNav({ user, links, isActive }: MobileNavProps) {
             Profile
           </Link>
 
-          <div className="flex items-center justify-between gap-3 rounded-lg px-3 py-1.5">
-            <span className="text-muted-foreground text-sm font-medium">
-              Appearance
-            </span>
-            <ThemeToggle />
-          </div>
+          <ThemeToggle layout="item" />
         </div>
 
         <Separator />
