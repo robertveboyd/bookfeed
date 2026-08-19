@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 
 import { type HeaderUser } from "@/components/auth/user-menu"
+import { UserAvatar } from "@/components/profile/user-avatar"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -69,9 +70,16 @@ export function MobileNav({ user, links, isActive }: MobileNavProps) {
         <MenuIcon />
       </SheetTrigger>
       <SheetContent side="right" className="w-72 gap-0 p-0">
-        <SheetHeader className="border-b border-border">
-          <SheetTitle>Menu</SheetTitle>
-          <p className="text-muted-foreground text-sm">@{user.username}</p>
+        <SheetHeader className="border-b border-border pr-12">
+          <SheetTitle className="flex items-center gap-2.5">
+            <UserAvatar
+              userId={user.id}
+              username={user.username}
+              imageUrl={user.image}
+              size={32}
+            />
+            <span className="truncate font-medium">@{user.username}</span>
+          </SheetTitle>
         </SheetHeader>
 
         <nav aria-label="Main" className="flex flex-col p-2">
