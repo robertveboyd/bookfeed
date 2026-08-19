@@ -16,7 +16,7 @@ export function ActivityCard({
   onOpenComments,
 }: ActivityCardProps) {
   return (
-    <article className="border-b border-border py-5 last:border-b-0">
+    <article className="border-b border-border py-5 first:pt-0 last:border-b-0">
       <ActivityPost
         item={item}
         footer={

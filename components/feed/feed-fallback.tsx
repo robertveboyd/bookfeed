@@ -44,7 +44,7 @@ export function FeedFallback() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="flex items-stretch gap-3 border-b border-border py-5 last:border-b-0 sm:gap-4"
+              className="flex items-stretch gap-3 border-b border-border py-5 first:pt-0 last:border-b-0 sm:gap-4"
             >
               <div className="bg-muted aspect-[2/3] w-[4.5rem] shrink-0 animate-pulse rounded-md sm:w-24" />
               <div className="flex min-w-0 flex-1 flex-col gap-2">
