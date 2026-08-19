@@ -1,15 +1,19 @@
-import Link from "next/link"
 import type { ReactNode } from "react"
 
 import { FriendshipActions } from "@/components/friends/friendship-actions"
 import { UserAvatar } from "@/components/profile/user-avatar"
 import { EmptyState } from "@/components/ui/empty-state"
+import { FriendHoverCard } from "@/components/users/friend-hover-card"
 import type {
   FriendshipWithUser,
   UserSearchHit,
 } from "@/lib/friends/types"
+import { cn } from "@/lib/utils"
 
-function UserRow({
+const peopleGridClass =
+  "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+
+function PersonCard({
   user,
   actions,
 }: {
@@ -17,19 +21,21 @@ function UserRow({
   actions: ReactNode
 }) {
   return (
-    <li className="flex items-center justify-between gap-3 py-3">
-      <Link
-        href={`/users/${user.username}`}
-        className="flex min-w-0 items-center gap-3 hover:opacity-90"
+    <li className="flex flex-col items-center gap-3 rounded-xl border border-border/80 px-3 py-4">
+      <FriendHoverCard
+        user={user}
+        className="flex w-full min-w-0 flex-col items-center gap-2 hover:opacity-90"
       >
         <UserAvatar
           userId={user.id}
           username={user.username}
           imageUrl={user.image}
-          size={40}
+          size={56}
         />
-        <span className="truncate font-medium">@{user.username}</span>
-      </Link>
+        <span className="w-full truncate text-center text-sm font-medium">
+          @{user.username}
+        </span>
+      </FriendHoverCard>
       {actions}
     </li>
   )
@@ -46,9 +52,9 @@ export function FriendsSearchResults({ hits }: { hits: UserSearchHit[] }) {
   }
 
   return (
-    <ul className="divide-y divide-border">
+    <ul className={peopleGridClass}>
       {hits.map((hit) => (
-        <UserRow
+        <PersonCard
           key={hit.id}
           user={hit}
           actions={
@@ -57,6 +63,7 @@ export function FriendsSearchResults({ hits }: { hits: UserSearchHit[] }) {
               username={hit.username}
               relation={hit.relation}
               friendshipId={hit.friendshipId}
+              align="center"
             />
           }
         />
@@ -69,6 +76,7 @@ export function FriendshipList({
   items,
   empty,
   mode,
+  fillEmpty = false,
 }: {
   items: FriendshipWithUser[]
   empty: {
@@ -77,10 +85,15 @@ export function FriendshipList({
     action?: { href: string; label: string }
   }
   mode: "incoming" | "outgoing" | "friends"
+  fillEmpty?: boolean
 }) {
   if (items.length === 0) {
     return (
       <EmptyState
+        className={cn(
+          fillEmpty &&
+            "min-h-0 flex-1 items-center justify-center text-center",
+        )}
         title={empty.title}
         description={empty.description}
         action={empty.action}
@@ -89,7 +102,7 @@ export function FriendshipList({
   }
 
   return (
-    <ul className="divide-y divide-border">
+    <ul className={peopleGridClass}>
       {items.map(({ friendship, user }) => {
         const relation =
           mode === "friends"
@@ -99,7 +112,7 @@ export function FriendshipList({
               : "outgoing_pending"
 
         return (
-          <UserRow
+          <PersonCard
             key={friendship.id}
             user={user}
             actions={
@@ -108,6 +121,7 @@ export function FriendshipList({
                 username={user.username}
                 relation={relation}
                 friendshipId={friendship.id}
+                align="center"
               />
             }
           />

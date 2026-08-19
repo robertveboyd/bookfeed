@@ -14,13 +14,23 @@ export async function FriendsDirectory() {
     listFriends(session.user.id),
   ])
 
+  const directoryEmpty =
+    friends.length === 0 && incoming.length === 0 && outgoing.length === 0
+
   return (
-    <>
-      <section className="space-y-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-10">
+      <section
+        className={
+          directoryEmpty
+            ? "flex min-h-0 flex-1 flex-col gap-4"
+            : "space-y-4"
+        }
+      >
         <h2 className="text-lg font-medium tracking-tight">Your friends</h2>
         <FriendshipList
           items={friends}
           mode="friends"
+          fillEmpty={directoryEmpty}
           empty={{
             title: "No friends yet",
             description:
@@ -62,6 +72,6 @@ export async function FriendsDirectory() {
           />
         </section>
       ) : null}
-    </>
+    </div>
   )
 }

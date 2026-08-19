@@ -5,7 +5,7 @@ import { FriendsDirectoryFallback } from "@/components/friends/friends-directory
 
 export default function FriendsLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-auto max-w-2xl space-y-10">
+    <div className="flex min-h-0 flex-1 flex-col gap-8">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">Friends</h1>
         <p className="text-muted-foreground text-sm">

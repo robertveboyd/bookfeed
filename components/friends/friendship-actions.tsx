@@ -29,6 +29,7 @@ type FriendshipActionsProps = {
   size?: "default" | "sm"
   /** Stretch actions to container width (profile header on mobile). */
   fullWidth?: boolean
+  align?: "end" | "center"
 }
 
 export function FriendshipActions({
@@ -38,6 +39,7 @@ export function FriendshipActions({
   friendshipId,
   size = "sm",
   fullWidth = false,
+  align = "end",
 }: FriendshipActionsProps) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -57,19 +59,25 @@ export function FriendshipActions({
     })
   }
 
+  const isCentered = align === "center"
+
   return (
     <div
       className={
         fullWidth
           ? "flex w-full flex-col items-stretch gap-1 sm:w-auto sm:items-end"
-          : "flex flex-col items-end gap-1"
+          : isCentered
+            ? "flex flex-col items-center gap-1"
+            : "flex flex-col items-end gap-1"
       }
     >
       <div
         className={
           fullWidth
             ? "flex flex-wrap gap-2 sm:justify-end [&_button]:min-h-10 sm:[&_button]:min-h-9 [&_button]:flex-1 sm:[&_button]:flex-none"
-            : "flex flex-wrap justify-end gap-2"
+            : isCentered
+              ? "flex flex-wrap justify-center gap-2"
+              : "flex flex-wrap justify-end gap-2"
         }
       >
         {relation === "none" ? (

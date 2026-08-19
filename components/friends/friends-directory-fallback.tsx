@@ -1,14 +1,8 @@
-export function FriendsUserRowFallback({
-  actionClassName = "w-24",
-}: {
-  actionClassName?: string
-}) {
+function PersonCardFallback({ actionClassName = "w-24" }: { actionClassName?: string }) {
   return (
-    <li className="flex items-center justify-between gap-3 py-3">
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="bg-muted size-10 animate-pulse rounded-full" />
-        <div className="bg-muted h-4 w-28 animate-pulse rounded" />
-      </div>
+    <li className="flex flex-col items-center gap-3 rounded-xl border border-border/80 px-3 py-4">
+      <div className="bg-muted size-14 animate-pulse rounded-full" />
+      <div className="bg-muted h-4 w-20 animate-pulse rounded" />
       <div
         className={`bg-muted h-7 animate-pulse rounded-lg ${actionClassName}`}
       />
@@ -16,37 +10,18 @@ export function FriendsUserRowFallback({
   )
 }
 
-function ListSectionFallback({
-  title,
-  rows,
-  actionClassName,
-}: {
-  title: string
-  rows: number
-  actionClassName?: string
-}) {
-  return (
-    <section className="space-y-4">
-      <h2 className="text-lg font-medium tracking-tight">{title}</h2>
-      <ul className="divide-y divide-border" aria-hidden>
-        {Array.from({ length: rows }).map((_, i) => (
-          <FriendsUserRowFallback key={i} actionClassName={actionClassName} />
-        ))}
-      </ul>
-    </section>
-  )
-}
+const peopleGridClass =
+  "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
 
 export function FriendsDirectoryFallback() {
   return (
-    <div aria-busy="true" aria-label="Loading friends" className="space-y-10">
-      <ListSectionFallback title="Your friends" rows={5} />
-      <ListSectionFallback
-        title="Incoming requests"
-        rows={2}
-        actionClassName="w-36"
-      />
-      <ListSectionFallback title="Sent requests" rows={2} />
+    <div aria-busy="true" aria-label="Loading friends" className="space-y-4">
+      <h2 className="text-lg font-medium tracking-tight">Your friends</h2>
+      <ul className={peopleGridClass} aria-hidden>
+        {Array.from({ length: 12 }).map((_, i) => (
+          <PersonCardFallback key={i} />
+        ))}
+      </ul>
     </div>
   )
 }
@@ -54,12 +29,12 @@ export function FriendsDirectoryFallback() {
 export function FriendsSearchHitsFallback() {
   return (
     <ul
-      className="divide-y divide-border"
+      className={peopleGridClass}
       aria-busy="true"
       aria-label="Loading search results"
     >
-      {Array.from({ length: 3 }).map((_, i) => (
-        <FriendsUserRowFallback key={i} />
+      {Array.from({ length: 6 }).map((_, i) => (
+        <PersonCardFallback key={i} />
       ))}
     </ul>
   )
