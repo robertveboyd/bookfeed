@@ -8,6 +8,7 @@ export function CatalogSearchResultsFallback() {
             <div className="bg-muted aspect-[2/3] animate-pulse rounded-md" />
             <div className="bg-muted mt-2 h-3 w-20 animate-pulse rounded" />
             <div className="bg-muted mt-1.5 h-2.5 w-14 animate-pulse rounded" />
+            <div className="bg-muted mt-1.5 h-2.5 w-10 animate-pulse rounded" />
           </li>
         ))}
       </ul>
