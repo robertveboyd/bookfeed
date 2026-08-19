@@ -3,8 +3,9 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import { BrandMark } from "@/components/brand-mark"
 import { UserMenu, type HeaderUser } from "@/components/auth/user-menu"
+import { BrandMark } from "@/components/brand-mark"
+import { MobileNav } from "@/components/mobile-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
 import {
   NavigationMenu,
@@ -40,7 +41,7 @@ export default function SiteHeader({ user }: { user: HeaderUser }) {
           Bookfeed
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="hidden items-center gap-3 md:flex">
           <NavigationMenu aria-label="Main">
             <NavigationMenuList>
               {links.map(({ href, label }) => (
@@ -58,9 +59,11 @@ export default function SiteHeader({ user }: { user: HeaderUser }) {
             </NavigationMenuList>
           </NavigationMenu>
 
-          <UserMenu user={user} />
           <ThemeToggle />
+          <UserMenu user={user} />
         </div>
+
+        <MobileNav user={user} links={links} isActive={isActive} />
       </div>
     </header>
   )
