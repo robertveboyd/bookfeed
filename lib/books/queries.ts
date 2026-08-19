@@ -3,6 +3,7 @@ import { z } from "zod"
 
 import { db } from "@/lib/db"
 import { authors, bookAuthors, books } from "@/lib/db/schema"
+import { ratingStatsForBookIds } from "@/lib/reviews/queries"
 
 import {
   GENRES,
@@ -67,7 +68,10 @@ export async function listShelves(options?: {
   const allIds = booksByGenre.flatMap(({ bookRows }) =>
     bookRows.map((b) => b.id),
   )
-  const authorMap = await authorsForBookIds(allIds)
+  const [authorMap, statsMap] = await Promise.all([
+    authorsForBookIds(allIds),
+    ratingStatsForBookIds(allIds),
+  ])
 
   return booksByGenre
     .map(({ genre, bookRows }) => {
@@ -77,6 +81,7 @@ export async function listShelves(options?: {
         coverImageId: book.coverImageId,
         genre: isGenre(book.genre) ? book.genre : null,
         authors: authorMap.get(book.id) ?? [],
+        rating: statsMap.get(book.id) ?? null,
       }))
 
       return { genre, books: tiles } satisfies BookShelf
@@ -160,13 +165,17 @@ export async function searchBooks(
     .orderBy(asc(books.title))
     .limit(limit)
     .offset(offset)
-  const authorMap = await authorsForBookIds(bookRows.map((b) => b.id))
+  const [authorMap, statsMap] = await Promise.all([
+    authorsForBookIds(bookRows.map((b) => b.id)),
+    ratingStatsForBookIds(bookRows.map((b) => b.id)),
+  ])
   const items: BookTile[] = bookRows.map((book) => ({
     id: book.id,
     title: book.title,
     coverImageId: book.coverImageId,
     genre: isGenre(book.genre) ? book.genre : null,
     authors: authorMap.get(book.id) ?? [],
+    rating: statsMap.get(book.id) ?? null,
   }))
   return {
     items,

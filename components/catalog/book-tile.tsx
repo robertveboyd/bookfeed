@@ -1,3 +1,4 @@
+import { StarIcon } from "lucide-react"
 import Link from "next/link"
 
 import { BookCover } from "@/components/catalog/book-cover"
@@ -68,6 +69,16 @@ export function BookTile({
         {authorsLabel ? (
           <p className="text-muted-foreground line-clamp-1 text-xs">
             {authorsLabel}
+          </p>
+        ) : null}
+        {book.rating && book.rating.count > 0 ? (
+          <p
+            className="flex items-center gap-1 text-xs tabular-nums"
+            aria-label={`${book.rating.average.toFixed(1)} out of 5 from ${book.rating.count} ${book.rating.count === 1 ? "rating" : "ratings"}`}
+          >
+            <StarIcon className="size-3 fill-current" aria-hidden />
+            <span>{book.rating.average.toFixed(1)}</span>
+            <span className="text-muted-foreground">({book.rating.count})</span>
           </p>
         ) : null}
       </div>

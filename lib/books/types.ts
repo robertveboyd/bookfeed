@@ -1,3 +1,5 @@
+import type { BookRatingStats } from "@/lib/reviews/types"
+
 /** Canonical genres — keep in sync with docs/GENRE_TAXONOMY.md */
 export const GENRES = [
   "Fiction",
@@ -44,6 +46,8 @@ export type BookTile = {
   coverImageId: string
   genre: Genre | null
   authors: string[]
+  /** Present on catalog tiles; omitted elsewhere. Hidden in UI when count is 0. */
+  rating?: BookRatingStats | null
 }
 
 export type BookShelf = {
