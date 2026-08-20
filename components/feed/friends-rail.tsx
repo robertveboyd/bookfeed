@@ -28,7 +28,7 @@ function FriendItem({ friend }: { friend: FriendRailItem }) {
           size={48}
         />
         {friend.reading ? (
-          <span className="absolute -right-1 -bottom-1 block size-6 overflow-hidden rounded-sm bg-muted ring-2 ring-background shadow-sm">
+          <span className="absolute -right-1 -bottom-1 block aspect-[2/3] w-5 overflow-hidden rounded-sm bg-muted ring-2 ring-background shadow-sm">
             <span className="relative block size-full">
               <BookCover
                 coverImageId={friend.reading.coverImageId}
