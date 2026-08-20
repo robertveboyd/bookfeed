@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useTransition } from "react"
-import { LogOut, User } from "lucide-react"
+import { LogOut, Settings } from "lucide-react"
 
 import { UserAvatar } from "@/components/profile/user-avatar"
 import {
@@ -36,9 +36,9 @@ export function UserMenu({ user }: { user: HeaderUser }) {
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-40">
-        <DropdownMenuItem render={<Link href="/profile" />} className="gap-2.5">
-          <User />
-          Profile
+        <DropdownMenuItem render={<Link href="/settings" />} className="gap-2.5">
+          <Settings />
+          Settings
         </DropdownMenuItem>
         <DropdownMenuItem
           className="gap-2.5"

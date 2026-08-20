@@ -25,7 +25,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { username } = await params
   if (username.trim().toLowerCase() === "you") {
-    return { title: "Profile" }
+    return { title: "Settings" }
   }
   const user = await getUserByUsername(username)
   return {
@@ -79,14 +79,14 @@ export default async function Page({ params }: PageProps) {
 
   // Product alias: /users/you always means "my profile".
   if (username.trim().toLowerCase() === "you") {
-    redirect("/profile")
+    redirect("/settings")
   }
 
   const user = await getUserByUsername(username)
   if (!user) notFound()
 
   if (user.id === session.user.id) {
-    redirect("/profile")
+    redirect("/settings")
   }
 
   const { relation, friendship } = await getFriendshipRelation(
@@ -95,7 +95,7 @@ export default async function Page({ params }: PageProps) {
   )
 
   if (relation === "self") {
-    redirect("/profile")
+    redirect("/settings")
   }
 
   const isFriend = relation === "friends"

@@ -31,7 +31,7 @@ export default function SiteHeader({ user }: { user: HeaderUser }) {
   }
 
   return (
-    <header className="border-b border-border">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4">
         <Link
           href="/"

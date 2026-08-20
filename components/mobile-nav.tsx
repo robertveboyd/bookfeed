@@ -9,7 +9,7 @@ import {
   LogOutIcon,
   MenuIcon,
   NewspaperIcon,
-  UserIcon,
+  SettingsIcon,
   UsersIcon,
 } from "lucide-react"
 
@@ -108,17 +108,17 @@ export function MobileNav({ user, links, isActive }: MobileNavProps) {
 
         <div className="flex flex-col p-2">
           <Link
-            href="/profile"
-            aria-current={pathname === "/profile" ? "page" : undefined}
+            href="/settings"
+            aria-current={pathname === "/settings" ? "page" : undefined}
             className={cn(
               "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium",
-              pathname === "/profile"
+              pathname === "/settings"
                 ? "bg-muted text-foreground"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
             )}
           >
-            <UserIcon className="size-4" />
-            Profile
+            <SettingsIcon className="size-4" />
+            Settings
           </Link>
 
           <ThemeToggle layout="item" />

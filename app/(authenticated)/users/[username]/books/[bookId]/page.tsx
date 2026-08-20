@@ -55,7 +55,7 @@ export default async function Page({ params }: PageProps) {
   if (username.trim().toLowerCase() === "you") {
     const self = session.user.username
     if (self) redirect(`/users/${self}/books/${bookId}`)
-    redirect("/profile")
+    redirect("/settings")
   }
 
   const user = await getUserByUsername(username)

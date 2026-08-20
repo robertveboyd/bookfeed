@@ -21,24 +21,7 @@ type UserProfileViewProps = {
   topBooks: TopBookSlot[]
 }
 
-function ProfileCurrentlyReading({
-  entry,
-  emptyLabel,
-}: {
-  entry: LibraryEntryTile | null
-  emptyLabel: string
-}) {
-  if (!entry) {
-    return (
-      <section className="space-y-3">
-        <h2 className="text-base font-semibold tracking-tight sm:text-lg">
-          Currently reading
-        </h2>
-        <EmptyState title="Nothing in progress" description={emptyLabel} />
-      </section>
-    )
-  }
-
+function ProfileCurrentlyReading({ entry }: { entry: LibraryEntryTile }) {
   const { book } = entry
   const authorsLabel = book.authors.join(", ")
 
@@ -82,39 +65,30 @@ function ProfileTopBooks({ slots }: { slots: TopBookSlot[] }) {
   return (
     <section className="space-y-3 sm:space-y-4">
       <h2 className="text-base font-semibold tracking-tight sm:text-lg">Top 5</h2>
-      {ordered.length === 0 ? (
-        <EmptyState
-          title="No top books yet"
-          description="They haven’t curated a Top 5 from finished books."
-        />
-      ) : (
-        <>
-          {/* Mobile: swipeable row */}
-          <div className="sm:hidden">
-            <HorizontalScroller bleed aria-label="Top 5 books">
-              {ordered.map((slot) => (
-                <div key={slot.position} role="listitem" className="relative shrink-0">
-                  <span className="bg-background/90 text-muted-foreground absolute top-1.5 left-1.5 z-10 rounded px-1 text-[10px] font-medium tabular-nums ring-1 ring-border">
-                    #{slot.position}
-                  </span>
-                  <BookTile book={slot.book} size="sm" />
-                </div>
-              ))}
-            </HorizontalScroller>
-          </div>
-          {/* Desktop: wrap */}
-          <ol className="hidden flex-wrap gap-x-3 gap-y-5 sm:flex sm:gap-x-4">
-            {ordered.map((slot) => (
-              <li key={slot.position} className="relative">
-                <span className="bg-background/90 text-muted-foreground absolute top-1.5 left-1.5 z-10 rounded px-1 text-[10px] font-medium tabular-nums ring-1 ring-border">
-                  #{slot.position}
-                </span>
-                <BookTile book={slot.book} size="md" />
-              </li>
-            ))}
-          </ol>
-        </>
-      )}
+      {/* Mobile: swipeable row */}
+      <div className="sm:hidden">
+        <HorizontalScroller bleed aria-label="Top 5 books">
+          {ordered.map((slot) => (
+            <div key={slot.position} role="listitem" className="relative shrink-0">
+              <span className="bg-background/90 text-muted-foreground absolute top-1.5 left-1.5 z-10 rounded px-1 text-[10px] font-medium tabular-nums ring-1 ring-border">
+                #{slot.position}
+              </span>
+              <BookTile book={slot.book} size="sm" />
+            </div>
+          ))}
+        </HorizontalScroller>
+      </div>
+      {/* Desktop: wrap */}
+      <ol className="hidden flex-wrap gap-x-3 gap-y-5 sm:flex sm:gap-x-4">
+        {ordered.map((slot) => (
+          <li key={slot.position} className="relative">
+            <span className="bg-background/90 text-muted-foreground absolute top-1.5 left-1.5 z-10 rounded px-1 text-[10px] font-medium tabular-nums ring-1 ring-border">
+              #{slot.position}
+            </span>
+            <BookTile book={slot.book} size="md" />
+          </li>
+        ))}
+      </ol>
     </section>
   )
 }
@@ -122,47 +96,34 @@ function ProfileTopBooks({ slots }: { slots: TopBookSlot[] }) {
 function ProfileGrid({
   title,
   entries,
-  empty,
   tileSize = "md",
 }: {
   title: string
   entries: LibraryEntryTile[]
-  empty: string
   tileSize?: "sm" | "md"
 }) {
   return (
     <section className="space-y-3 sm:space-y-4">
       <h2 className="text-base font-semibold tracking-tight sm:text-lg">
         {title}
-        {entries.length > 0 ? (
-          <span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">
-            {entries.length}
-          </span>
-        ) : null}
+        <span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">
+          {entries.length}
+        </span>
       </h2>
-      {entries.length === 0 ? (
-        <EmptyState
-          title={`No ${title.toLowerCase()} books`}
-          description={empty}
-        />
-      ) : (
-        <>
-          <div className="sm:hidden">
-            <HorizontalScroller bleed aria-label={title}>
-              {entries.map((entry) => (
-                <div key={entry.id} role="listitem" className="shrink-0">
-                  <BookTile book={entry.book} size="sm" />
-                </div>
-              ))}
-            </HorizontalScroller>
-          </div>
-          <div className="hidden flex-wrap gap-x-3 gap-y-5 sm:flex sm:gap-x-4 sm:gap-y-6">
-            {entries.map((entry) => (
-              <BookTile key={entry.id} book={entry.book} size={tileSize} />
-            ))}
-          </div>
-        </>
-      )}
+      <div className="sm:hidden">
+        <HorizontalScroller bleed aria-label={title}>
+          {entries.map((entry) => (
+            <div key={entry.id} role="listitem" className="shrink-0">
+              <BookTile book={entry.book} size="sm" />
+            </div>
+          ))}
+        </HorizontalScroller>
+      </div>
+      <div className="hidden flex-wrap gap-x-3 gap-y-5 sm:flex sm:gap-x-4 sm:gap-y-6">
+        {entries.map((entry) => (
+          <BookTile key={entry.id} book={entry.book} size={tileSize} />
+        ))}
+      </div>
     </section>
   )
 }
@@ -175,8 +136,20 @@ export function UserProfileView({
   lists,
   topBooks,
 }: UserProfileViewProps) {
+  const read = lists.read ?? []
+  const interested = lists.interested ?? []
+  const hasReading = lists.reading != null
+  const hasTopBooks = topBooks.length > 0
+  const hasLibraryActivity =
+    hasReading || read.length > 0 || interested.length > 0
+
+  const showEmptyLibrary =
+    mode === "friend"
+      ? !hasLibraryActivity && !hasTopBooks
+      : !hasReading
+
   return (
-    <div className="mx-auto max-w-4xl space-y-8 sm:space-y-10">
+    <div className="mx-auto flex max-w-4xl flex-col gap-8 sm:gap-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <UserAvatar
@@ -209,27 +182,43 @@ export function UserProfileView({
         </div>
       </div>
 
-      <ProfileCurrentlyReading
-        entry={lists.reading}
-        emptyLabel="Not reading anything right now."
-      />
-
-      {mode === "friend" ? (
+      {showEmptyLibrary ? (
+        <EmptyState
+          className="min-h-48 flex-1 items-center justify-center text-center sm:min-h-64"
+          title={
+            mode === "friend"
+              ? `@${user.username} has no activity yet`
+              : `@${user.username} isn’t reading anything right now`
+          }
+          description={
+            mode === "friend"
+              ? "When they start tracking books, their library will show up here."
+              : "Add them as a friend to see their full library."
+          }
+        />
+      ) : (
         <>
-          <ProfileTopBooks slots={topBooks} />
-          <ProfileGrid
-            title="Read"
-            entries={lists.read ?? []}
-            empty="No finished books yet."
-          />
-          <ProfileGrid
-            title="Interested"
-            entries={lists.interested ?? []}
-            empty="Nothing on their shortlist."
-            tileSize="sm"
-          />
+          {hasReading ? (
+            <ProfileCurrentlyReading entry={lists.reading!} />
+          ) : null}
+
+          {mode === "friend" ? (
+            <>
+              {hasTopBooks ? <ProfileTopBooks slots={topBooks} /> : null}
+              {read.length > 0 ? (
+                <ProfileGrid title="Read" entries={read} />
+              ) : null}
+              {interested.length > 0 ? (
+                <ProfileGrid
+                  title="Interested"
+                  entries={interested}
+                  tileSize="sm"
+                />
+              ) : null}
+            </>
+          ) : null}
         </>
-      ) : null}
+      )}
     </div>
   )
 }

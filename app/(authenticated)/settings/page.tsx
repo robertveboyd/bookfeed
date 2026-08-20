@@ -8,7 +8,7 @@ import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
 
 export const metadata: Metadata = {
-  title: "Profile",
+  title: "Settings",
 }
 
 export default async function Page() {
@@ -29,7 +29,7 @@ export default async function Page() {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">@{user.username}</p>
       </div>
 

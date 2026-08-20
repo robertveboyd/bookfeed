@@ -39,7 +39,7 @@ async function requireUserId(): Promise<string | null> {
 }
 
 function revalidateAvatarPaths(username?: string | null) {
-  revalidatePath("/profile")
+  revalidatePath("/settings")
   // Header avatar in authenticated layout.
   revalidatePath("/", "layout")
   // Feed / friends rail avatars.
