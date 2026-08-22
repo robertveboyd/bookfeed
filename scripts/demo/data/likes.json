@@ -3,78 +3,298 @@
     "username": "maya",
     "title": "Dune",
     "type": "reviewed",
-    "likedBy": ["robert", "jordan", "sam", "ravi"]
+    "likedBy": [
+      "robert",
+      "jordan",
+      "sam",
+      "ravi",
+      "priya",
+      "lena",
+      "nico",
+      "harper",
+      "sage",
+      "miles",
+      "zoe"
+    ]
+  },
+  {
+    "username": "maya",
+    "title": "Dune",
+    "type": "finished_reading",
+    "likedBy": [
+      "robert",
+      "jordan",
+      "nico",
+      "harper",
+      "ravi",
+      "sage"
+    ]
   },
   {
     "username": "jordan",
     "title": "Pachinko",
     "type": "reviewed",
-    "likedBy": ["robert", "harper", "priya"]
+    "likedBy": [
+      "robert",
+      "harper",
+      "priya",
+      "sam",
+      "lena",
+      "nico",
+      "ravi",
+      "sage",
+      "miles"
+    ]
+  },
+  {
+    "username": "jordan",
+    "title": "Pachinko",
+    "type": "finished_reading",
+    "likedBy": [
+      "robert",
+      "harper",
+      "nico",
+      "ravi",
+      "sage",
+      "miles"
+    ]
   },
   {
     "username": "robert",
     "title": "Dune",
     "type": "reviewed",
-    "likedBy": ["maya", "sam"]
+    "likedBy": [
+      "maya",
+      "sam",
+      "lena",
+      "nico",
+      "harper",
+      "ravi"
+    ]
+  },
+  {
+    "username": "robert",
+    "title": "Dune",
+    "type": "finished_reading",
+    "likedBy": [
+      "maya",
+      "sam",
+      "ravi",
+      "sage",
+      "miles",
+      "zoe"
+    ]
   },
   {
     "username": "lena",
     "title": "The Seven Husbands of Evelyn Hugo",
     "type": "reviewed",
-    "likedBy": ["zoe", "priya", "robert"]
+    "likedBy": [
+      "zoe",
+      "priya",
+      "robert",
+      "nico",
+      "harper",
+      "ravi",
+      "sage",
+      "miles",
+      "maya"
+    ]
+  },
+  {
+    "username": "lena",
+    "title": "The Seven Husbands of Evelyn Hugo",
+    "type": "finished_reading",
+    "likedBy": [
+      "zoe",
+      "priya",
+      "ravi",
+      "sage",
+      "miles",
+      "robert"
+    ]
   },
   {
     "username": "sage",
     "title": "The Haunting of Hill House",
     "type": "reviewed",
-    "likedBy": ["nico", "priya"]
+    "likedBy": [
+      "nico",
+      "priya",
+      "lena",
+      "harper",
+      "ravi",
+      "miles"
+    ]
+  },
+  {
+    "username": "sage",
+    "title": "The Haunting of Hill House",
+    "type": "finished_reading",
+    "likedBy": [
+      "nico",
+      "priya",
+      "miles",
+      "zoe",
+      "robert",
+      "maya"
+    ]
   },
   {
     "username": "sam",
     "title": "Foundation",
     "type": "reviewed",
-    "likedBy": ["maya", "robert"]
+    "likedBy": [
+      "maya",
+      "robert",
+      "ravi",
+      "sage",
+      "miles",
+      "zoe"
+    ]
+  },
+  {
+    "username": "sam",
+    "title": "Foundation",
+    "type": "finished_reading",
+    "likedBy": [
+      "maya",
+      "robert",
+      "zoe",
+      "jordan",
+      "priya",
+      "lena"
+    ]
   },
   {
     "username": "harper",
     "title": "All the Light We Cannot See",
     "type": "reviewed",
-    "likedBy": ["jordan", "robert"]
+    "likedBy": [
+      "jordan",
+      "robert",
+      "sage",
+      "miles",
+      "zoe",
+      "maya"
+    ]
+  },
+  {
+    "username": "harper",
+    "title": "All the Light We Cannot See",
+    "type": "finished_reading",
+    "likedBy": [
+      "jordan",
+      "robert",
+      "maya",
+      "priya",
+      "sam",
+      "lena"
+    ]
   },
   {
     "username": "ravi",
     "title": "The Lord of the Rings",
     "type": "reviewed",
-    "likedBy": ["robert", "maya"]
+    "likedBy": [
+      "robert",
+      "maya",
+      "miles",
+      "zoe",
+      "jordan",
+      "priya"
+    ]
+  },
+  {
+    "username": "ravi",
+    "title": "The Lord of the Rings",
+    "type": "finished_reading",
+    "likedBy": [
+      "robert",
+      "maya",
+      "priya",
+      "sam",
+      "lena",
+      "nico"
+    ]
   },
   {
     "username": "nico",
     "title": "Mexican Gothic",
     "type": "reviewed",
-    "likedBy": ["sage"]
+    "likedBy": [
+      "sage",
+      "miles",
+      "zoe"
+    ]
+  },
+  {
+    "username": "nico",
+    "title": "Mexican Gothic",
+    "type": "finished_reading",
+    "likedBy": [
+      "sage",
+      "maya",
+      "jordan"
+    ]
   },
   {
     "username": "zoe",
     "title": "Pride and Prejudice",
     "type": "reviewed",
-    "likedBy": ["lena", "robert"]
+    "likedBy": [
+      "lena",
+      "robert",
+      "maya",
+      "jordan",
+      "priya",
+      "sam"
+    ]
+  },
+  {
+    "username": "zoe",
+    "title": "Pride and Prejudice",
+    "type": "finished_reading",
+    "likedBy": [
+      "lena",
+      "robert",
+      "sam",
+      "nico",
+      "harper",
+      "ravi"
+    ]
   },
   {
     "username": "maya",
     "title": "Hyperion",
     "type": "started_reading",
-    "likedBy": ["robert", "sam"]
+    "likedBy": [
+      "robert",
+      "sam",
+      "priya",
+      "lena",
+      "nico",
+      "harper"
+    ]
   },
   {
     "username": "lena",
     "title": "Fourth Wing",
     "type": "started_reading",
-    "likedBy": ["zoe"]
+    "likedBy": [
+      "zoe",
+      "maya",
+      "jordan"
+    ]
   },
   {
     "username": "miles",
     "title": "The Big Sleep",
     "type": "started_reading",
-    "likedBy": ["priya"]
+    "likedBy": [
+      "priya",
+      "jordan",
+      "sam"
+    ]
   }
 ]

@@ -18,10 +18,12 @@ import {
   commentLikes,
   friendships,
   libraryEntries,
+  notifications,
   reviews,
   userTopBooks,
   users,
 } from "../../lib/db/schema"
+import type { NotificationType } from "../../lib/notifications/types"
 import { REVIEW_BODY_MAX } from "../../lib/reviews/types"
 import { normalizeEmail, normalizeUsername } from "../../lib/users/util/normalize"
 import { hashPassword } from "../../lib/users/util/password"
@@ -31,6 +33,7 @@ const EXPECTED_USER_COUNT = 12
 const FINISH_BEFORE_RATE_DAYS = 3
 const FRIENDSHIP_DAYS_AGO = 60
 const USER_CREATED_DAYS_AGO = 90
+const PENDING_INCOMING_FRIENDS = ["maya", "zoe"] as const
 
 type ActivityType = (typeof ACTIVITY_TYPES)[number]
 
@@ -101,6 +104,68 @@ function trimBody(value: string | undefined): string | null {
   if (value == null) return null
   const trimmed = value.trim()
   return trimmed.length === 0 ? null : trimmed
+}
+
+type NotificationAgg = {
+  recipientId: string
+  type: NotificationType
+  latestActorId: string
+  actorIds: string[]
+  activityId: string | null
+  commentId: string | null
+  friendshipId: string | null
+  updatedAt: Date
+  createdAt: Date
+}
+
+function notificationGroupKey(input: {
+  recipientId: string
+  type: NotificationType
+  activityId?: string | null
+  commentId?: string | null
+  friendshipId?: string | null
+}) {
+  return `${input.recipientId}|${input.type}|${input.activityId ?? ""}|${input.commentId ?? ""}|${input.friendshipId ?? ""}`
+}
+
+function upsertNotificationAgg(
+  map: Map<string, NotificationAgg>,
+  input: {
+    recipientId: string
+    actorId: string
+    type: NotificationType
+    activityId?: string
+    commentId?: string
+    friendshipId?: string
+    at: Date
+  },
+) {
+  if (input.recipientId === input.actorId) return
+
+  const key = notificationGroupKey(input)
+  const existing = map.get(key)
+  if (!existing) {
+    map.set(key, {
+      recipientId: input.recipientId,
+      type: input.type,
+      latestActorId: input.actorId,
+      actorIds: [input.actorId],
+      activityId: input.activityId ?? null,
+      commentId: input.commentId ?? null,
+      friendshipId: input.friendshipId ?? null,
+      updatedAt: input.at,
+      createdAt: input.at,
+    })
+    return
+  }
+
+  if (!existing.actorIds.includes(input.actorId)) {
+    existing.actorIds.push(input.actorId)
+  }
+  existing.latestActorId = input.actorId
+  if (input.at > existing.updatedAt) {
+    existing.updatedAt = input.at
+  }
 }
 
 function requireIntDays(value: unknown, context: string): number {
@@ -421,18 +486,54 @@ async function seed() {
 
   const showcaseId = requireUser(showcaseUsername, "showcase")
   const friendAt = daysAgo(FRIENDSHIP_DAYS_AGO)
+  const pendingIncoming = new Set(
+    PENDING_INCOMING_FRIENDS.map((username) => normalizeUsername(username)),
+  )
+  const notificationMap = new Map<string, NotificationAgg>()
   const friendRows = insertedUsers
     .filter((u) => u.username !== showcaseUsername)
-    .map((u) => ({
-      requesterId: showcaseId,
-      addresseeId: u.id,
-      status: "accepted" as const,
-      createdAt: friendAt,
-      updatedAt: friendAt,
-    }))
-  await db.insert(friendships).values(friendRows)
+    .map((u) =>
+      pendingIncoming.has(u.username)
+        ? {
+            requesterId: u.id,
+            addresseeId: showcaseId,
+            status: "pending" as const,
+            createdAt: friendAt,
+            updatedAt: friendAt,
+          }
+        : {
+            requesterId: showcaseId,
+            addresseeId: u.id,
+            status: "accepted" as const,
+            createdAt: friendAt,
+            updatedAt: friendAt,
+          },
+    )
+  const insertedFriendships = await db
+    .insert(friendships)
+    .values(friendRows)
+    .returning({
+      id: friendships.id,
+      requesterId: friendships.requesterId,
+      addresseeId: friendships.addresseeId,
+      status: friendships.status,
+    })
+
+  for (const friendship of insertedFriendships) {
+    if (friendship.status !== "pending" || friendship.addresseeId !== showcaseId) {
+      continue
+    }
+    upsertNotificationAgg(notificationMap, {
+      recipientId: showcaseId,
+      actorId: friendship.requesterId,
+      type: "friend_request",
+      friendshipId: friendship.id,
+      at: friendAt,
+    })
+  }
 
   const activityIdByKey = new Map<string, string>()
+  const activityActorById = new Map<string, string>()
 
   async function insertActivity(input: {
     username: string
@@ -456,6 +557,7 @@ async function seed() {
       })
       .returning({ id: activities.id })
     activityIdByKey.set(activityKey(input.username, input.title, input.type), row.id)
+    activityActorById.set(row.id, input.actorId)
   }
 
   for (const user of userRows) {
@@ -561,6 +663,8 @@ async function seed() {
     return id
   }
 
+  const commentAuthorsByActivity = new Map<string, Set<string>>()
+
   for (const [index, comment] of comments.entries()) {
     const context = `comments.json[${index}]`
     const authorId = requireUser(comment.author, context)
@@ -570,6 +674,12 @@ async function seed() {
       comment.on.type,
       context,
     )
+    const activityOwnerId = activityActorById.get(activityId)
+    if (!activityOwnerId) {
+      throw new Error(`${context}: missing activity owner for ${activityId}`)
+    }
+    const priorAuthors = commentAuthorsByActivity.get(activityId) ?? new Set<string>()
+    const commentAt = daysAgo(comment.daysAgo, index)
     const body = trimBody(comment.body)!
     const [row] = await db
       .insert(activityComments)
@@ -577,19 +687,57 @@ async function seed() {
         activityId,
         authorId,
         body,
-        createdAt: daysAgo(comment.daysAgo, index),
+        createdAt: commentAt,
       })
       .returning({ id: activityComments.id })
 
+    if (authorId !== activityOwnerId) {
+      upsertNotificationAgg(notificationMap, {
+        recipientId: activityOwnerId,
+        actorId: authorId,
+        type: "activity_comment",
+        activityId,
+        at: commentAt,
+      })
+    }
+
+    for (const participantId of priorAuthors) {
+      if (participantId === activityOwnerId) continue
+      upsertNotificationAgg(notificationMap, {
+        recipientId: participantId,
+        actorId: authorId,
+        type: "thread_comment",
+        activityId,
+        at: commentAt,
+      })
+    }
+
+    if (!commentAuthorsByActivity.has(activityId)) {
+      commentAuthorsByActivity.set(activityId, new Set())
+    }
+    commentAuthorsByActivity.get(activityId)!.add(authorId)
+
     const likers = [...new Set(comment.likedBy ?? [])]
     if (likers.length === 0) continue
-    await db.insert(commentLikes).values(
-      likers.map((username, likeIndex) => ({
+
+    const commentLikeRows = likers.map((username, likeIndex) => {
+      const userId = requireUser(username, `${context} likedBy`)
+      const likedAt = daysAgo(Math.max(0, comment.daysAgo - 1), likeIndex)
+      upsertNotificationAgg(notificationMap, {
+        recipientId: authorId,
+        actorId: userId,
+        type: "comment_like",
+        activityId,
         commentId: row.id,
-        userId: requireUser(username, `${context} likedBy`),
-        createdAt: daysAgo(Math.max(0, comment.daysAgo - 1), likeIndex),
-      })),
-    )
+        at: likedAt,
+      })
+      return {
+        commentId: row.id,
+        userId,
+        createdAt: likedAt,
+      }
+    })
+    await db.insert(commentLikes).values(commentLikeRows)
   }
 
   const likeRows: { activityId: string; userId: string; createdAt: Date }[] = []
@@ -605,16 +753,61 @@ async function seed() {
       const key = `${activityId}|${userId}`
       if (likeSeen.has(key)) continue
       likeSeen.add(key)
+      const likedAt = daysAgo(1, index)
       likeRows.push({
         activityId,
         userId,
-        createdAt: daysAgo(1, index),
+        createdAt: likedAt,
       })
+      const ownerId = activityActorById.get(activityId)
+      if (ownerId) {
+        upsertNotificationAgg(notificationMap, {
+          recipientId: ownerId,
+          actorId: userId,
+          type: "activity_like",
+          activityId,
+          at: likedAt,
+        })
+      }
     }
   }
   if (likeRows.length > 0) {
     await db.insert(activityLikes).values(likeRows)
   }
+
+  const notificationRows = [...notificationMap.values()].map((notification, index) => {
+    const isShowcase = notification.recipientId === showcaseId
+    const readAt =
+      isShowcase
+        ? index % 8 === 0
+          ? notification.updatedAt
+          : null
+        : index % 3 !== 0
+          ? notification.updatedAt
+          : null
+
+    return {
+      recipientId: notification.recipientId,
+      type: notification.type,
+      latestActorId: notification.latestActorId,
+      actorCount: notification.actorIds.length,
+      actorIds: notification.actorIds,
+      activityId: notification.activityId,
+      commentId: notification.commentId,
+      friendshipId: notification.friendshipId,
+      readAt,
+      createdAt: notification.createdAt,
+      updatedAt: notification.updatedAt,
+    }
+  })
+
+  if (notificationRows.length > 0) {
+    await db.insert(notifications).values(notificationRows)
+  }
+
+  const showcaseUnread = notificationRows.filter(
+    (row) => row.recipientId === showcaseId && row.readAt == null,
+  ).length
 
   console.log(
     [
@@ -624,6 +817,9 @@ async function seed() {
       `  email:    ${showcaseEmail}`,
       `  password: ${demoConfig.password}`,
       `  profile:  /users/${showcaseUsername}`,
+      "",
+      `Pending friend requests: ${PENDING_INCOMING_FRIENDS.join(", ")}`,
+      `Notifications for showcase user: ${notificationRows.filter((row) => row.recipientId === showcaseId).length} (${showcaseUnread} unread)`,
       "",
       `(all ${EXPECTED_USER_COUNT} accounts share this password)`,
     ].join("\n"),
