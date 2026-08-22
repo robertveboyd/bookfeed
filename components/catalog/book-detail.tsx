@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { BookCover } from "@/components/catalog/book-cover"
 import { BookDetailActions } from "@/components/catalog/book-detail-actions"
+import { BookCommunityRating } from "@/components/reviews/book-review-form"
 import type { BookDetail as BookDetailData } from "@/lib/books/types"
 import type { LibraryStatus } from "@/lib/library/types"
 import type { BookRatingStats, Review } from "@/lib/reviews/types"
@@ -55,6 +56,7 @@ export function BookDetail({
             {meta ? (
               <p className="text-muted-foreground text-sm">{meta}</p>
             ) : null}
+            <BookCommunityRating stats={stats} />
           </div>
 
           <BookDetailActions

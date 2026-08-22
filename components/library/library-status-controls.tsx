@@ -1,34 +1,13 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
-
-import { Button } from "@/components/ui/button"
+import { ReadingConflictDialog } from "@/components/library/reading-conflict-dialog"
+import { useLibraryStatus } from "@/components/library/use-library-status"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
-  clearLibraryStatus,
-  setLibraryStatus,
-} from "@/lib/library/actions/set-status"
-import type {
-  LibraryStatus,
-  ReadingConflict,
-} from "@/lib/library/types"
-
-const ACTIONS: {
-  status: LibraryStatus
-  label: string
-}[] = [
-  { status: "interested", label: "Interested" },
-  { status: "reading", label: "Started reading" },
-  { status: "read", label: "Finished" },
-]
+  LIBRARY_STATUS_OPTIONS,
+  libraryStatusOption,
+} from "@/lib/library/status-options"
+import type { LibraryStatus } from "@/lib/library/types"
+import { cn } from "@/lib/utils"
 
 type LibraryStatusControlsProps = {
   bookId: string
@@ -44,144 +23,73 @@ export function LibraryStatusControls({
   canEdit = true,
   onStatusChange,
 }: LibraryStatusControlsProps) {
-  const router = useRouter()
-  const [status, setStatus] = useState<LibraryStatus | null>(initialStatus)
-  const [error, setError] = useState<string | null>(null)
-  const [conflict, setConflict] = useState<ReadingConflict | null>(null)
-  const [pending, startTransition] = useTransition()
+  const {
+    status,
+    error,
+    conflict,
+    conflictPending,
+    setConflict,
+    applyStatus,
+    onSelect,
+  } = useLibraryStatus({ bookId, initialStatus, onStatusChange })
 
   if (!canEdit) {
     if (!status) return null
-    const label = ACTIONS.find((a) => a.status === status)?.label ?? status
+    const option = libraryStatusOption(status)
     return (
       <p className="text-muted-foreground text-sm">
-        Status: <span className="text-foreground font-medium">{label}</span>
+        Status:{" "}
+        <span className="text-foreground font-medium">{option.menuLabel}</span>
       </p>
     )
   }
 
-  function applyStatus(
-    next: LibraryStatus,
-    resolveReadingConflict?: "finish" | "demote",
-  ) {
-    setError(null)
-    startTransition(async () => {
-      const result = await setLibraryStatus({
-        bookId,
-        status: next,
-        resolveReadingConflict,
-      })
-
-      if (result.ok) {
-        setStatus(result.entry.status)
-        setConflict(null)
-        onStatusChange?.(result.entry.status)
-        // Conflict resolution also changes another book's status.
-        if (resolveReadingConflict) {
-          router.refresh()
-        }
-        return
-      }
-
-      if (result.code === "conflict") {
-        setConflict(result.conflict)
-        return
-      }
-
-      setError(result.message)
-      setConflict(null)
-    })
-  }
-
-  function clearStatus() {
-    setError(null)
-    startTransition(async () => {
-      const result = await clearLibraryStatus({ bookId })
-      if (result.ok) {
-        setStatus(null)
-        setConflict(null)
-        onStatusChange?.(null)
-        return
-      }
-      setError(result.message)
-    })
-  }
-
-  function onSelect(next: LibraryStatus) {
-    if (pending) return
-    if (next === status) {
-      clearStatus()
-      return
-    }
-    applyStatus(next)
-  }
-
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {ACTIONS.map(({ status: actionStatus, label }) => {
-          const active = status === actionStatus
+    <section className="space-y-2">
+      <div
+        role="radiogroup"
+        aria-label="Library status"
+        className="grid w-full grid-cols-3 gap-2"
+      >
+        {LIBRARY_STATUS_OPTIONS.map(({ status: optionStatus, label, Icon }) => {
+          const active = status === optionStatus
           return (
-            <Button
-              key={actionStatus}
+            <button
+              key={optionStatus}
               type="button"
-              size="sm"
-              variant={active ? "default" : "outline"}
-              disabled={pending}
-              aria-pressed={active}
-              title={active ? "Click again to remove status" : undefined}
-              onClick={() => onSelect(actionStatus)}
+              role="radio"
+              aria-checked={active}
+              aria-label={
+                active
+                  ? `${label}, selected. Activate to remove from library`
+                  : label
+              }
+              onClick={() => onSelect(optionStatus)}
+              className={cn(
+                "relative flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border px-1.5 py-2.5 text-sm transition-all duration-200 outline-none sm:flex-row sm:gap-1.5 sm:py-2",
+                "focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2",
+                active
+                  ? "border-foreground bg-foreground font-semibold text-background shadow-md"
+                  : "border-border bg-background font-medium text-muted-foreground shadow-sm hover:border-foreground/35 hover:bg-muted/50 hover:text-foreground",
+              )}
             >
-              {label}
-            </Button>
+              <Icon className="size-3.5 shrink-0" aria-hidden />
+              <span className="truncate text-xs sm:text-sm">{label}</span>
+            </button>
           )
         })}
       </div>
 
       {error ? <p className="text-destructive text-sm">{error}</p> : null}
 
-      <Dialog
-        open={conflict !== null}
-        onOpenChange={(open) => {
-          if (!open && !pending) setConflict(null)
-        }}
-      >
-        <DialogContent showCloseButton={!pending}>
-          <DialogHeader>
-            <DialogTitle>Already reading another book</DialogTitle>
-            <DialogDescription>
-              {conflict
-                ? `You're already reading “${conflict.title}”. Mark it finished, or move it to Interested?`
-                : null}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={pending}
-              onClick={() => setConflict(null)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={pending}
-              onClick={() => applyStatus("reading", "demote")}
-            >
-              Move to Interested
-            </Button>
-            <Button
-              type="button"
-              disabled={pending}
-              onClick={() => applyStatus("reading", "finish")}
-            >
-              Mark finished
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+      <ReadingConflictDialog
+        conflict={conflict}
+        pending={conflictPending}
+        onOpenChange={() => setConflict(null)}
+        onCancel={() => setConflict(null)}
+        onDemote={() => applyStatus("reading", "demote")}
+        onFinish={() => applyStatus("reading", "finish")}
+      />
+    </section>
   )
 }
