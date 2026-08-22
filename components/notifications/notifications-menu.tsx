@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react"
 import { BellIcon } from "lucide-react"
 
 import { RelativeTime } from "@/components/feed/relative-time"
+import { HeaderIconButton } from "@/components/nav/header-icon-button"
 import { UserAvatar } from "@/components/profile/user-avatar"
 import {
   DropdownMenu,
@@ -86,11 +87,15 @@ export function NotificationsMenu({
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger
-        className="relative inline-flex size-8 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-        aria-label={
-          unreadCount > 0
-            ? `Notifications, ${unreadCount} unread`
-            : "Notifications"
+        render={
+          <HeaderIconButton
+            aria-label={
+              unreadCount > 0
+                ? `Notifications, ${unreadCount} unread`
+                : "Notifications"
+            }
+            className="relative"
+          />
         }
       >
         <BellIcon className="size-4" />

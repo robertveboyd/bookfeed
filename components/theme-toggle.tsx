@@ -4,7 +4,7 @@ import { MoonIcon, SunIcon, SunMoon } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
-import { Button } from "@/components/ui/button"
+import { HeaderIconButton } from "@/components/nav/header-icon-button"
 import { cn } from "@/lib/utils"
 
 type ThemeToggleProps = {
@@ -39,7 +39,7 @@ export function ThemeToggle({
         aria-label={label}
         onClick={toggle}
         className={cn(
-          "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground disabled:opacity-50",
+          "flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground disabled:opacity-50",
           className,
         )}
       >
@@ -56,29 +56,20 @@ export function ThemeToggle({
     )
   }
 
-  if (!mounted) {
-    return (
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label="Toggle theme"
-        disabled
-        className={cn("size-8", className)}
-      />
-    )
-  }
-
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
+    <HeaderIconButton
       aria-label={label}
+      disabled={!mounted}
       onClick={toggle}
-      className={cn("size-8", className)}
+      className={className}
     >
-      {isDark ? <SunIcon /> : <MoonIcon />}
-    </Button>
+      {!mounted ? (
+        <MoonIcon className="size-4 opacity-50" />
+      ) : isDark ? (
+        <SunIcon className="size-4" />
+      ) : (
+        <MoonIcon className="size-4" />
+      )}
+    </HeaderIconButton>
   )
 }
