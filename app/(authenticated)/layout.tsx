@@ -4,6 +4,7 @@ import SiteHeader from "@/components/site-header"
 import { requireSession } from "@/lib/auth/util/session"
 import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
+import { countUnreadNotifications } from "@/lib/notifications/queries"
 
 export default async function Layout({
   children,
@@ -12,15 +13,19 @@ export default async function Layout({
 }) {
   const session = await requireSession()
 
-  const [user] = await db
-    .select({
-      id: users.id,
-      username: users.username,
-      image: users.image,
-    })
-    .from(users)
-    .where(eq(users.id, session.user.id))
-    .limit(1)
+  const [user, unreadNotificationCount] = await Promise.all([
+    db
+      .select({
+        id: users.id,
+        username: users.username,
+        image: users.image,
+      })
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1)
+      .then((rows) => rows[0]),
+    countUnreadNotifications(session.user.id),
+  ])
 
   const headerUser = user ?? {
     id: session.user.id,
@@ -30,7 +35,10 @@ export default async function Layout({
 
   return (
     <>
-      <SiteHeader user={headerUser} />
+      <SiteHeader
+        user={headerUser}
+        unreadNotificationCount={unreadNotificationCount}
+      />
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8">
         {children}
       </main>

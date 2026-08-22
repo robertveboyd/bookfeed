@@ -13,6 +13,11 @@ import {
   getUserById,
 } from "@/lib/friends/queries"
 import type { FriendActionResult } from "@/lib/friends/types"
+import {
+  deleteNotificationsByFriendship,
+  notifyFriendRequest,
+  notifyFriendRequestAccepted,
+} from "@/lib/notifications/service"
 
 const inputSchema = z.object({
   userId: z.uuid(),
@@ -22,6 +27,7 @@ const inputSchema = z.object({
 function revalidateFriendPaths(usernames: Array<string | null | undefined>) {
   revalidatePath("/friends")
   revalidatePath("/")
+  revalidatePath("/", "layout")
   const seen = new Set<string>()
   for (const username of usernames) {
     if (!username || seen.has(username)) continue
@@ -83,11 +89,23 @@ export async function sendFriendRequest(input: {
   }
 
   try {
-    await db.insert(friendships).values({
-      requesterId: viewerId,
-      addresseeId: targetId,
-      status: "pending",
-    })
+    const [inserted] = await db
+      .insert(friendships)
+      .values({
+        requesterId: viewerId,
+        addresseeId: targetId,
+        status: "pending",
+      })
+      .returning({ id: friendships.id })
+
+    if (inserted) {
+      await notifyFriendRequest({
+        friendshipId: inserted.id,
+        requesterId: viewerId,
+        addresseeId: targetId,
+      })
+    }
+
     revalidateFriendPaths([viewerUsername, target.username])
     return { ok: true }
   } catch (error) {
@@ -153,6 +171,12 @@ export async function acceptFriendRequest(input: {
       and(eq(friendships.id, row.id), eq(friendships.addresseeId, viewerId)),
     )
 
+  await notifyFriendRequestAccepted({
+    friendshipId: row.id,
+    requesterId: row.requesterId,
+    addresseeId: viewerId,
+  })
+
   revalidateFriendPaths([viewerUsername, requester?.username])
   return { ok: true }
 }
@@ -197,6 +221,7 @@ export async function cancelFriendRequest(input: {
   }
 
   const addressee = await getUserById(row.addresseeId)
+  await deleteNotificationsByFriendship(row.id)
   await db.delete(friendships).where(eq(friendships.id, row.id))
   revalidateFriendPaths([viewerUsername, addressee?.username])
   return { ok: true }
@@ -242,6 +267,7 @@ export async function declineFriendRequest(input: {
   }
 
   const requester = await getUserById(row.requesterId)
+  await deleteNotificationsByFriendship(row.id)
   await db.delete(friendships).where(eq(friendships.id, row.id))
   revalidateFriendPaths([viewerUsername, requester?.username])
   return { ok: true }

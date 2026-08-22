@@ -12,7 +12,17 @@ export const metadata: Metadata = {
   title: "Feed",
 }
 
-async function FeedContent() {
+type PageProps = {
+  searchParams: Promise<{ activity?: string; comments?: string }>
+}
+
+async function FeedContent({
+  deepLinkActivityId,
+  openComments,
+}: {
+  deepLinkActivityId: string | null
+  openComments: boolean
+}) {
   const session = await requireSession()
 
   const [feed, friends] = await Promise.all([
@@ -39,6 +49,8 @@ async function FeedContent() {
             initialItems={feed.items}
             initialCursor={feed.nextCursor}
             friendCount={friends.length}
+            deepLinkActivityId={deepLinkActivityId}
+            deepLinkOpenComments={openComments}
           />
         </div>
       </div>
@@ -46,10 +58,20 @@ async function FeedContent() {
   )
 }
 
-export default function Page() {
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams
+  const deepLinkActivityId =
+    typeof params.activity === "string" && params.activity.length > 0
+      ? params.activity
+      : null
+  const openComments = params.comments === "1"
+
   return (
     <Suspense fallback={<FeedFallback />}>
-      <FeedContent />
+      <FeedContent
+        deepLinkActivityId={deepLinkActivityId}
+        openComments={openComments}
+      />
     </Suspense>
   )
 }

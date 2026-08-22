@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { UserMenu, type HeaderUser } from "@/components/auth/user-menu"
 import { BrandMark } from "@/components/brand-mark"
 import { MobileNav } from "@/components/mobile-nav"
+import { NotificationsMenu } from "@/components/notifications/notifications-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
 import {
   NavigationMenu,
@@ -22,7 +23,13 @@ const links = [
   { href: "/friends", label: "Friends" },
 ]
 
-export default function SiteHeader({ user }: { user: HeaderUser }) {
+export default function SiteHeader({
+  user,
+  unreadNotificationCount,
+}: {
+  user: HeaderUser
+  unreadNotificationCount: number
+}) {
   const pathname = usePathname()
 
   function isActive(href: string) {
@@ -60,10 +67,16 @@ export default function SiteHeader({ user }: { user: HeaderUser }) {
           </NavigationMenu>
 
           <ThemeToggle />
+          <NotificationsMenu initialUnreadCount={unreadNotificationCount} />
           <UserMenu user={user} />
         </div>
 
-        <MobileNav user={user} links={links} isActive={isActive} />
+        <MobileNav
+          user={user}
+          links={links}
+          isActive={isActive}
+          unreadNotificationCount={unreadNotificationCount}
+        />
       </div>
     </header>
   )

@@ -1,6 +1,7 @@
 "use server"
 
 import { and, eq } from "drizzle-orm"
+import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import { auth } from "@/lib/auth"
@@ -9,7 +10,9 @@ import {
   countCommentLikes,
   getActivityComment,
   getCommentById,
+  getFeedActivityItem,
   getVisibleActivity,
+  listActivityCommentAuthorIds,
   listActivityComments,
   listFriendsFeed,
   normalizeCommentBody,
@@ -25,10 +28,25 @@ import {
 } from "@/lib/activity/types"
 import { db } from "@/lib/db"
 import { activityComments, activityLikes, commentLikes } from "@/lib/db/schema"
+import {
+  notifyActivityCommented,
+  notifyActivityLiked,
+  notifyCommentLiked,
+  notifyThreadCommented,
+} from "@/lib/notifications/service"
 
 export type LoadMoreFeedResult =
   | { ok: true; items: FeedActivityItem[]; nextCursor: string | null }
   | { ok: false; message: string }
+
+export type LoadFeedActivityResult =
+  | { ok: true; item: FeedActivityItem }
+  | { ok: false; code: "unauthorized" | "not_found"; message: string }
+
+function revalidateEngagementPaths() {
+  revalidatePath("/")
+  revalidatePath("/", "layout")
+}
 
 const activityIdSchema = z.object({
   activityId: z.uuid(),
@@ -64,6 +82,30 @@ export async function loadMoreFeed(input: {
     cursor: input.cursor,
   })
   return { ok: true, items: page.items, nextCursor: page.nextCursor }
+}
+
+export async function loadFeedActivity(input: {
+  activityId: string
+}): Promise<LoadFeedActivityResult> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { ok: false, code: "unauthorized", message: "Sign in required." }
+  }
+
+  const parsed = activityIdSchema.safeParse(input)
+  if (!parsed.success) {
+    return { ok: false, code: "not_found", message: "Activity not found." }
+  }
+
+  const item = await getFeedActivityItem(
+    session.user.id,
+    parsed.data.activityId,
+  )
+  if (!item) {
+    return { ok: false, code: "not_found", message: "Activity not found." }
+  }
+
+  return { ok: true, item }
 }
 
 export async function toggleActivityLike(input: {
@@ -105,6 +147,15 @@ export async function toggleActivityLike(input: {
   }
 
   const likeCount = await countActivityLikes(activityId)
+
+  await notifyActivityLiked({
+    activityId,
+    actorId: viewerId,
+    ownerId: activity.actorId,
+    liked,
+  })
+  revalidateEngagementPaths()
+
   return { ok: true, liked, likeCount }
 }
 
@@ -151,6 +202,16 @@ export async function toggleCommentLike(input: {
   }
 
   const likeCount = await countCommentLikes(existing.id)
+
+  await notifyCommentLiked({
+    commentId: existing.id,
+    activityId: existing.activityId,
+    actorId: viewerId,
+    authorId: existing.authorId,
+    liked,
+  })
+  revalidateEngagementPaths()
+
   return { ok: true, liked, likeCount }
 }
 
@@ -211,6 +272,23 @@ export async function createActivityComment(input: {
       message: "Something went wrong. Please try again.",
     }
   }
+
+  await notifyActivityCommented({
+    activityId: activity.id,
+    actorId: viewerId,
+    ownerId: activity.actorId,
+  })
+
+  const authorIds = await listActivityCommentAuthorIds(activity.id)
+  const threadParticipants = authorIds.filter(
+    (id) => id !== activity.actorId,
+  )
+  await notifyThreadCommented({
+    activityId: activity.id,
+    actorId: viewerId,
+    participantIds: threadParticipants,
+  })
+  revalidateEngagementPaths()
 
   return { ok: true, comment }
 }

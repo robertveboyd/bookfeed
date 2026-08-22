@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 
 import { type HeaderUser } from "@/components/auth/user-menu"
+import { NotificationsMenu } from "@/components/notifications/notifications-menu"
 import { UserAvatar } from "@/components/profile/user-avatar"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -43,9 +44,15 @@ type MobileNavProps = {
   user: HeaderUser
   links: NavLink[]
   isActive: (href: string) => boolean
+  unreadNotificationCount: number
 }
 
-export function MobileNav({ user, links, isActive }: MobileNavProps) {
+export function MobileNav({
+  user,
+  links,
+  isActive,
+  unreadNotificationCount,
+}: MobileNavProps) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
@@ -55,7 +62,9 @@ export function MobileNav({ user, links, isActive }: MobileNavProps) {
   }, [pathname])
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <div className="flex items-center gap-1 md:hidden">
+      <NotificationsMenu initialUnreadCount={unreadNotificationCount} />
+      <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
           <Button
@@ -144,5 +153,6 @@ export function MobileNav({ user, links, isActive }: MobileNavProps) {
         </div>
       </SheetContent>
     </Sheet>
+    </div>
   )
 }

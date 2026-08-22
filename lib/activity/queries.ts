@@ -1,12 +1,4 @@
-import {
-  and,
-  count,
-  desc,
-  eq,
-  inArray,
-  lt,
-  or,
-} from "drizzle-orm"
+import { and, count, desc, eq, inArray, isNull, lt, or } from "drizzle-orm"
 import { z } from "zod"
 
 import {
@@ -381,6 +373,78 @@ export async function countCommentLikes(commentId: string): Promise<number> {
     .from(commentLikes)
     .where(eq(commentLikes.commentId, commentId))
   return Number(row?.n ?? 0)
+}
+
+/** Distinct authors who commented on an activity (live comments only). */
+export async function listActivityCommentAuthorIds(
+  activityId: string,
+): Promise<string[]> {
+  const rows = await db
+    .selectDistinct({ authorId: activityComments.authorId })
+    .from(activityComments)
+    .where(
+      and(
+        eq(activityComments.activityId, activityId),
+        isNull(activityComments.deletedAt),
+      ),
+    )
+
+  return rows.map((row) => row.authorId)
+}
+
+export async function getFeedActivityItem(
+  viewerId: string,
+  activityId: string,
+): Promise<FeedActivityItem | null> {
+  const activity = await getVisibleActivity(viewerId, activityId)
+  if (!activity) return null
+
+  const [row] = await db
+    .select({
+      activityId: activities.id,
+      activityType: activities.type,
+      activityCreatedAt: activities.createdAt,
+      activityRating: activities.rating,
+      actorId: users.id,
+      actorUsername: users.username,
+      actorImage: users.image,
+      bookId: books.id,
+      bookTitle: books.title,
+      bookCoverImageId: books.coverImageId,
+      reviewBody: reviews.body,
+    })
+    .from(activities)
+    .innerJoin(users, eq(users.id, activities.actorId))
+    .innerJoin(books, eq(books.id, activities.bookId))
+    .leftJoin(reviews, eq(reviews.id, activities.reviewId))
+    .where(eq(activities.id, activityId))
+    .limit(1)
+
+  if (!row) return null
+
+  const authorMap = await authorsForBookIds([row.bookId])
+  const [item] = await attachFeedEngagement(viewerId, [
+    {
+      id: row.activityId,
+      type: row.activityType,
+      createdAt: row.activityCreatedAt,
+      rating: row.activityRating,
+      reviewBody: row.reviewBody,
+      actor: {
+        id: row.actorId,
+        username: row.actorUsername,
+        image: row.actorImage,
+      },
+      book: {
+        id: row.bookId,
+        title: row.bookTitle,
+        coverImageId: row.bookCoverImageId,
+        authors: authorMap.get(row.bookId) ?? [],
+      },
+    },
+  ])
+
+  return item ?? null
 }
 
 export async function listFriendsFeed(

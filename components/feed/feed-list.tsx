@@ -1,24 +1,28 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 
 import { ActivityCard } from "@/components/feed/activity-card"
 import { ActivityCommentsDialog } from "@/components/feed/activity-comments-dialog"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
-import { loadMoreFeed } from "@/lib/activity/actions"
+import { loadFeedActivity, loadMoreFeed } from "@/lib/activity/actions"
 import type { FeedActivityItem } from "@/lib/activity/types"
 
 type FeedListProps = {
   initialItems: FeedActivityItem[]
   initialCursor: string | null
   friendCount: number
+  deepLinkActivityId?: string | null
+  deepLinkOpenComments?: boolean
 }
 
 export function FeedList({
   initialItems,
   initialCursor,
   friendCount,
+  deepLinkActivityId = null,
+  deepLinkOpenComments = false,
 }: FeedListProps) {
   const [items, setItems] = useState(initialItems)
   const [cursor, setCursor] = useState(initialCursor)
@@ -27,9 +31,51 @@ export function FeedList({
   const [commentActivityId, setCommentActivityId] = useState<string | null>(
     null,
   )
-  const commentItem = commentActivityId
-    ? (items.find((row) => row.id === commentActivityId) ?? null)
-    : null
+  const [deepLinkItem, setDeepLinkItem] = useState<FeedActivityItem | null>(
+    null,
+  )
+  const [deepLinkHandled, setDeepLinkHandled] = useState(false)
+
+  const commentItem =
+    commentActivityId !== null
+      ? (items.find((row) => row.id === commentActivityId) ??
+        (deepLinkItem?.id === commentActivityId ? deepLinkItem : null))
+      : null
+
+  useEffect(() => {
+    if (!deepLinkActivityId || deepLinkHandled) return
+
+    const inFeed = initialItems.find((row) => row.id === deepLinkActivityId)
+    if (inFeed) {
+      if (deepLinkOpenComments) {
+        setCommentActivityId(deepLinkActivityId)
+      }
+      setDeepLinkHandled(true)
+      return
+    }
+
+    let cancelled = false
+    void loadFeedActivity({ activityId: deepLinkActivityId }).then((result) => {
+      if (cancelled || !result.ok) {
+        setDeepLinkHandled(true)
+        return
+      }
+      setDeepLinkItem(result.item)
+      if (deepLinkOpenComments) {
+        setCommentActivityId(result.item.id)
+      }
+      setDeepLinkHandled(true)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [
+    deepLinkActivityId,
+    deepLinkHandled,
+    deepLinkOpenComments,
+    initialItems,
+  ])
 
   if (items.length === 0) {
     if (friendCount === 0) {

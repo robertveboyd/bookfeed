@@ -10,11 +10,13 @@ import {
   uniqueIndex,
   primaryKey,
   check,
+  jsonb,
 } from "drizzle-orm/pg-core"
 
 import { FRIENDSHIP_STATUSES } from "@/lib/friends/types"
 import { LIBRARY_STATUSES } from "@/lib/library/types"
 import { ACTIVITY_TYPES, COMMENT_BODY_MAX } from "@/lib/activity/types"
+import { NOTIFICATION_TYPES } from "@/lib/notifications/types"
 
 export const UsersUnique = {
   email: "users_email_unique",
@@ -330,6 +332,70 @@ export const commentLikes = pgTable(
       columns: [t.commentId, t.userId],
     }),
     index("comment_likes_user_id_idx").on(t.userId),
+  ],
+)
+
+export const notificationTypeEnum = pgEnum("notification_type", NOTIFICATION_TYPES)
+
+export const NotificationsUnique = {
+  friendship: "notifications_recipient_type_friendship_unique",
+  activityLike: "notifications_recipient_activity_like_unique",
+  commentLike: "notifications_recipient_comment_like_unique",
+  activityComment: "notifications_recipient_activity_comment_unique",
+  threadComment: "notifications_recipient_thread_comment_unique",
+} as const
+
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    recipientId: uuid("recipient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: notificationTypeEnum("type").notNull(),
+    latestActorId: uuid("latest_actor_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    actorCount: integer("actor_count").notNull().default(1),
+    actorIds: jsonb("actor_ids").$type<string[]>().notNull().default([]),
+    activityId: uuid("activity_id").references(() => activities.id, {
+      onDelete: "cascade",
+    }),
+    commentId: uuid("comment_id").references(() => activityComments.id, {
+      onDelete: "cascade",
+    }),
+    friendshipId: uuid("friendship_id").references(() => friendships.id, {
+      onDelete: "cascade",
+    }),
+    readAt: timestamp("read_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("notifications_recipient_id_read_at_idx").on(t.recipientId, t.readAt),
+    index("notifications_recipient_id_updated_at_idx").on(
+      t.recipientId,
+      t.updatedAt,
+    ),
+    uniqueIndex(NotificationsUnique.friendship)
+      .on(t.recipientId, t.type, t.friendshipId)
+      .where(sql`${t.friendshipId} IS NOT NULL`),
+    uniqueIndex(NotificationsUnique.activityLike)
+      .on(t.recipientId, t.type, t.activityId)
+      .where(sql`${t.type} = 'activity_like'`),
+    uniqueIndex(NotificationsUnique.commentLike)
+      .on(t.recipientId, t.type, t.commentId)
+      .where(sql`${t.type} = 'comment_like'`),
+    uniqueIndex(NotificationsUnique.activityComment)
+      .on(t.recipientId, t.type, t.activityId)
+      .where(sql`${t.type} = 'activity_comment'`),
+    uniqueIndex(NotificationsUnique.threadComment)
+      .on(t.recipientId, t.type, t.activityId)
+      .where(sql`${t.type} = 'thread_comment'`),
   ],
 )
 
