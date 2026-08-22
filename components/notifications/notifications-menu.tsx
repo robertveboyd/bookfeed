@@ -18,8 +18,8 @@ import {
   loadNotifications,
   markAllNotificationsReadAction,
 } from "@/lib/notifications/actions"
+import { NotificationMessage } from "@/components/notifications/notification-message"
 import {
-  formatNotificationMessage,
   formatUnreadBadge,
   notificationHref,
 } from "@/lib/notifications/format"
@@ -138,7 +138,7 @@ export function NotificationsMenu({
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm leading-snug">
-                    {formatNotificationMessage(item)}
+                    <NotificationMessage item={item} />
                   </p>
                   <RelativeTime
                     date={item.updatedAt}

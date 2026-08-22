@@ -1,10 +1,13 @@
 import { and, count, desc, eq, isNull } from "drizzle-orm"
+import { alias } from "drizzle-orm/pg-core"
 
+import type { ActivityType } from "@/lib/activity/types"
 import { db } from "@/lib/db"
-import { notifications, users } from "@/lib/db/schema"
+import { activities, books, notifications, users } from "@/lib/db/schema"
 import type { NotificationItem, NotificationType } from "@/lib/notifications/types"
 
 const NOTIFICATION_LIST_LIMIT = 30
+const activityOwners = alias(users, "activity_owner")
 
 type NotificationRow = {
   id: string
@@ -18,9 +21,29 @@ type NotificationRow = {
   latestActorId: string
   latestActorUsername: string
   latestActorImage: string | null
+  activityType: ActivityType | null
+  bookTitle: string | null
+  activityOwnerId: string | null
+  activityOwnerUsername: string | null
 }
 
-function toNotificationItem(row: NotificationRow): NotificationItem {
+function toNotificationItem(
+  row: NotificationRow,
+  recipientId: string,
+): NotificationItem {
+  const activity =
+    row.activityType &&
+    row.bookTitle &&
+    row.activityOwnerId &&
+    row.activityOwnerUsername
+      ? {
+          type: row.activityType,
+          bookTitle: row.bookTitle,
+          ownerUsername: row.activityOwnerUsername,
+          isOwn: row.activityOwnerId === recipientId,
+        }
+      : null
+
   return {
     id: row.id,
     type: row.type,
@@ -33,6 +56,7 @@ function toNotificationItem(row: NotificationRow): NotificationItem {
     activityId: row.activityId,
     commentId: row.commentId,
     friendshipId: row.friendshipId,
+    activity,
     readAt: row.readAt,
     updatedAt: row.updatedAt,
   }
@@ -69,14 +93,21 @@ export async function listNotifications(
       latestActorId: users.id,
       latestActorUsername: users.username,
       latestActorImage: users.image,
+      activityType: activities.type,
+      bookTitle: books.title,
+      activityOwnerId: activityOwners.id,
+      activityOwnerUsername: activityOwners.username,
     })
     .from(notifications)
     .innerJoin(users, eq(users.id, notifications.latestActorId))
+    .leftJoin(activities, eq(activities.id, notifications.activityId))
+    .leftJoin(books, eq(books.id, activities.bookId))
+    .leftJoin(activityOwners, eq(activityOwners.id, activities.actorId))
     .where(eq(notifications.recipientId, recipientId))
     .orderBy(desc(notifications.updatedAt), desc(notifications.id))
     .limit(NOTIFICATION_LIST_LIMIT)
 
-  return rows.map(toNotificationItem)
+  return rows.map((row) => toNotificationItem(row, recipientId))
 }
 
 export async function getNotificationForRecipient(

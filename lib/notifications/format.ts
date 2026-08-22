@@ -1,7 +1,24 @@
+import type { ActivityType } from "@/lib/activity/types"
+import { excerptText } from "@/lib/activity/format"
 import type { NotificationItem } from "@/lib/notifications/types"
+
+const BOOK_TITLE_MAX = 48
+
+export type NotificationMessageSegment = {
+  text: string
+  emphasis?: boolean
+}
 
 function actorLabel(username: string): string {
   return `@${username}`
+}
+
+function bookTitleLabel(title: string): string {
+  return excerptText(title, BOOK_TITLE_MAX)
+}
+
+function bookSegment(title: string): NotificationMessageSegment {
+  return { text: bookTitleLabel(title), emphasis: true }
 }
 
 function othersPhrase(count: number): string {
@@ -9,51 +26,159 @@ function othersPhrase(count: number): string {
   return `${count} others`
 }
 
-function aggregatedAction(
+function aggregatedActionSegments(
   latestUsername: string,
   actorCount: number,
-  verb: string,
-): string {
+  actionSegments: NotificationMessageSegment[],
+): NotificationMessageSegment[] {
   const name = actorLabel(latestUsername)
-  if (actorCount <= 1) return `${name} ${verb}`
-  return `${name} and ${othersPhrase(actorCount - 1)} ${verb}`
+  const prefix =
+    actorCount <= 1
+      ? [{ text: `${name} ` }]
+      : [{ text: `${name} and ${othersPhrase(actorCount - 1)} ` }]
+  return [...prefix, ...actionSegments]
 }
 
-export function formatNotificationMessage(item: NotificationItem): string {
+function ownedActivityNounSegments(
+  activityType: ActivityType,
+  bookTitle: string,
+): NotificationMessageSegment[] {
+  switch (activityType) {
+    case "started_reading":
+      return [{ text: "your update: started reading " }, bookSegment(bookTitle)]
+    case "finished_reading":
+      return [{ text: "your update: finished " }, bookSegment(bookTitle)]
+    case "rated":
+      return [{ text: "your rating of " }, bookSegment(bookTitle)]
+    case "reviewed":
+      return [{ text: "your review of " }, bookSegment(bookTitle)]
+  }
+}
+
+function activityNounSegments(
+  activityType: ActivityType,
+  bookTitle: string,
+  ownerUsername: string,
+  isOwn: boolean,
+): NotificationMessageSegment[] {
+  if (isOwn) {
+    return ownedActivityNounSegments(activityType, bookTitle)
+  }
+
+  const owner = actorLabel(ownerUsername)
+  switch (activityType) {
+    case "started_reading":
+      return [
+        { text: `${owner}'s update: started reading ` },
+        bookSegment(bookTitle),
+      ]
+    case "finished_reading":
+      return [{ text: `${owner}'s update: finished ` }, bookSegment(bookTitle)]
+    case "rated":
+      return [{ text: `${owner}'s rating of ` }, bookSegment(bookTitle)]
+    case "reviewed":
+      return [{ text: `${owner}'s review of ` }, bookSegment(bookTitle)]
+  }
+}
+
+function activityLikeSegments(item: NotificationItem): NotificationMessageSegment[] {
+  if (!item.activity) return [{ text: "liked your update" }]
+  return [
+    { text: "liked " },
+    ...activityNounSegments(
+      item.activity.type,
+      item.activity.bookTitle,
+      item.activity.ownerUsername,
+      item.activity.isOwn,
+    ),
+  ]
+}
+
+function activityCommentSegments(
+  item: NotificationItem,
+): NotificationMessageSegment[] {
+  if (!item.activity) return [{ text: "commented on your update" }]
+  return [
+    { text: "commented on " },
+    ...ownedActivityNounSegments(
+      item.activity.type,
+      item.activity.bookTitle,
+    ),
+  ]
+}
+
+function threadCommentSegments(item: NotificationItem): NotificationMessageSegment[] {
+  if (!item.activity) return [{ text: "also commented" }]
+  return [
+    { text: "also commented on " },
+    ...activityNounSegments(
+      item.activity.type,
+      item.activity.bookTitle,
+      item.activity.ownerUsername,
+      item.activity.isOwn,
+    ),
+  ]
+}
+
+function commentLikeSegments(item: NotificationItem): NotificationMessageSegment[] {
+  if (!item.activity) return [{ text: "liked your comment" }]
+  return [
+    { text: "liked your comment on " },
+    bookSegment(item.activity.bookTitle),
+  ]
+}
+
+export function formatNotificationMessageSegments(
+  item: NotificationItem,
+): NotificationMessageSegment[] {
   switch (item.type) {
     case "friend_request":
-      return `${actorLabel(item.latestActor.username)} sent you a friend request`
+      return [
+        {
+          text: `${actorLabel(item.latestActor.username)} sent you a friend request`,
+        },
+      ]
     case "friend_request_accepted":
-      return `${actorLabel(item.latestActor.username)} accepted your friend request`
+      return [
+        {
+          text: `${actorLabel(item.latestActor.username)} accepted your friend request`,
+        },
+      ]
     case "activity_like":
-      return aggregatedAction(
+      return aggregatedActionSegments(
         item.latestActor.username,
         item.actorCount,
-        "liked your update",
+        activityLikeSegments(item),
       )
     case "comment_like":
-      return aggregatedAction(
+      return aggregatedActionSegments(
         item.latestActor.username,
         item.actorCount,
-        "liked your comment",
+        commentLikeSegments(item),
       )
     case "activity_comment":
-      return aggregatedAction(
+      return aggregatedActionSegments(
         item.latestActor.username,
         item.actorCount,
-        "commented on your update",
+        activityCommentSegments(item),
       )
     case "thread_comment":
-      return aggregatedAction(
+      return aggregatedActionSegments(
         item.latestActor.username,
         item.actorCount,
-        "also commented",
+        threadCommentSegments(item),
       )
     default: {
       const _exhaustive: never = item.type
-      return _exhaustive
+      return [{ text: _exhaustive }]
     }
   }
+}
+
+export function formatNotificationMessage(item: NotificationItem): string {
+  return formatNotificationMessageSegments(item)
+    .map((segment) => segment.text)
+    .join("")
 }
 
 export function notificationHref(item: NotificationItem): string {

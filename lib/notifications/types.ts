@@ -1,3 +1,5 @@
+import type { ActivityType } from "@/lib/activity/types"
+
 export const NOTIFICATION_TYPES = [
   "friend_request",
   "friend_request_accepted",
@@ -15,6 +17,13 @@ export type NotificationActor = {
   image: string | null
 }
 
+export type NotificationActivityContext = {
+  type: ActivityType
+  bookTitle: string
+  ownerUsername: string
+  isOwn: boolean
+}
+
 export type NotificationItem = {
   id: string
   type: NotificationType
@@ -23,6 +32,7 @@ export type NotificationItem = {
   activityId: string | null
   commentId: string | null
   friendshipId: string | null
+  activity: NotificationActivityContext | null
   readAt: Date | null
   updatedAt: Date
 }
