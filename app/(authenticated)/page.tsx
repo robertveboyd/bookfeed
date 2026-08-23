@@ -37,15 +37,13 @@ async function FeedContent({
       <div className="flex min-h-0 flex-1 flex-col gap-8 lg:flex-row lg:gap-10">
         <FriendsRail friends={friends} variant="rail" />
 
-        <div className="scrollbar-hidden flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain">
-          <FeedList
-            initialItems={feed.items}
-            initialCursor={feed.nextCursor}
-            friendCount={friends.length}
-            deepLinkActivityId={deepLinkActivityId}
-            deepLinkOpenComments={openComments}
-          />
-        </div>
+        <FeedList
+          initialItems={feed.items}
+          initialCursor={feed.nextCursor}
+          friendCount={friends.length}
+          deepLinkActivityId={deepLinkActivityId}
+          deepLinkOpenComments={openComments}
+        />
       </div>
     </div>
   )
