@@ -1,4 +1,4 @@
-import { BOOK_SEED } from "../seed-data/books.ts"
+import { BOOK_SEED } from "../seed-data/books"
 
 export type BookContext = {
   title: string
