@@ -14,6 +14,8 @@ type UseInfiniteScrollOptions = {
   /** Re-run the fill check after items append (short first page). */
   itemCount: number
   prefetchPx?: number
+  /** Set once the scroll root element is mounted. */
+  scrollRootReady?: boolean
 }
 
 function isSentinelNearScrollBottom(
@@ -39,6 +41,7 @@ export function useInfiniteScroll({
   onLoadMore,
   itemCount,
   prefetchPx = INFINITE_SCROLL_PREFETCH_PX,
+  scrollRootReady = true,
 }: UseInfiniteScrollOptions) {
   const onLoadMoreRef = useRef(onLoadMore)
   onLoadMoreRef.current = onLoadMore
@@ -61,7 +64,7 @@ export function useInfiniteScroll({
   }, [hasMore, isLoading, prefetchPx, scrollRootRef, sentinelRef])
 
   useEffect(() => {
-    if (!hasMore) return
+    if (!hasMore || !scrollRootReady) return
 
     const root = scrollRootRef.current
     const sentinel = sentinelRef.current
@@ -79,7 +82,7 @@ export function useInfiniteScroll({
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [hasMore, prefetchPx, scrollRootRef, sentinelRef])
+  }, [hasMore, prefetchPx, scrollRootReady, scrollRootRef, sentinelRef])
 
   useEffect(() => {
     if (!hasMore || isLoading) return

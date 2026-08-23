@@ -25,8 +25,9 @@ export function FeedList({
   deepLinkActivityId = null,
   deepLinkOpenComments = false,
 }: FeedListProps) {
-  const scrollRootRef = useRef<HTMLDivElement>(null)
+  const scrollRootRef = useRef<HTMLElement | null>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const [scrollRootReady, setScrollRootReady] = useState(false)
 
   const [items, setItems] = useState(initialItems)
   const [cursor, setCursor] = useState(initialCursor)
@@ -67,7 +68,13 @@ export function FeedList({
     isLoading: pending,
     onLoadMore: loadMore,
     itemCount: items.length,
+    scrollRootReady,
   })
+
+  useEffect(() => {
+    scrollRootRef.current = document.querySelector("main")
+    setScrollRootReady(true)
+  }, [])
 
   useEffect(() => {
     if (!deepLinkActivityId || deepLinkHandled) return
@@ -107,29 +114,30 @@ export function FeedList({
   if (items.length === 0) {
     if (friendCount === 0) {
       return (
-        <EmptyState
-          className="min-h-0 flex-1 items-center justify-center text-center"
-          title="Your feed is quiet"
-          description="Add friends to see what they’re reading — you can like and comment on their updates. Your own reading will show up here too."
-        />
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <EmptyState
+            className="min-h-0 flex-1 items-center justify-center text-center"
+            title="Your feed is quiet"
+            description="Add friends to see what they’re reading — you can like and comment on their updates. Your own reading will show up here too."
+          />
+        </div>
       )
     }
 
     return (
-      <EmptyState
-        className="min-h-0 flex-1 items-center justify-center text-center"
-        title="No activity yet"
-        description="When you or your friends start a book, finish one, or leave a rating, it’ll show up here — ready to like and comment."
-        action={{ href: "/friends", label: "View friends" }}
-      />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <EmptyState
+          className="min-h-0 flex-1 items-center justify-center text-center"
+          title="No activity yet"
+          description="When you or your friends start a book, finish one, or leave a rating, it’ll show up here — ready to like and comment."
+          action={{ href: "/friends", label: "View friends" }}
+        />
+      </div>
     )
   }
 
   return (
-    <div
-      ref={scrollRootRef}
-      className="scrollbar-hidden flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
-    >
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <div className="divide-y-0">
         {items.map((item) => (
           <ActivityCard

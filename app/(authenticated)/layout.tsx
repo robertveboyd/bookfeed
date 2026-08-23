@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm"
 
 import SiteHeader from "@/components/site-header"
+import { AuthenticatedMain } from "@/components/authenticated-main"
 import { requireSession } from "@/lib/auth/util/session"
 import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
@@ -39,9 +40,7 @@ export default async function Layout({
         user={headerUser}
         unreadNotificationCount={unreadNotificationCount}
       />
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col min-h-0 overflow-y-auto px-4 py-8">
-        {children}
-      </main>
+      <AuthenticatedMain>{children}</AuthenticatedMain>
     </>
   )
 }

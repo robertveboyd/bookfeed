@@ -1,7 +1,7 @@
 export function FeedFallback() {
   return (
     <div
-      className="flex min-h-0 flex-1 flex-col gap-6 lg:overflow-hidden"
+      className="flex flex-col gap-6"
       aria-busy="true"
       aria-label="Loading feed"
     >
@@ -19,12 +19,15 @@ export function FeedFallback() {
         </div>
       </section>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-8 lg:flex-row lg:gap-10">
-        <aside className="hidden w-52 shrink-0 lg:flex lg:min-h-0 lg:flex-col xl:w-64">
-          <div className="scrollbar-hidden min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+      <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
+        <aside className="hidden w-52 shrink-0 lg:block lg:sticky lg:top-0 lg:self-start xl:w-64">
+          <div className="scrollbar-hidden max-h-[calc(100dvh-3.5rem-2rem)] overflow-y-auto overscroll-y-contain">
             <ul className="grid grid-cols-2 gap-x-2 gap-y-4 xl:grid-cols-3">
               {Array.from({ length: 9 }).map((_, i) => (
-                <li key={i} className="flex min-w-0 flex-col items-center gap-1.5">
+                <li
+                  key={i}
+                  className="flex min-w-0 flex-col items-center gap-1.5"
+                >
                   <div className="bg-muted size-12 animate-pulse rounded-full" />
                   <div className="bg-muted h-3 w-full max-w-12 animate-pulse rounded" />
                 </li>
@@ -33,7 +36,7 @@ export function FeedFallback() {
           </div>
         </aside>
 
-        <div className="scrollbar-hidden min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
+        <div className="min-h-0 min-w-0 flex-1">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}

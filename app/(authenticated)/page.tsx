@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 
+import { FeedBody } from "@/components/feed/feed-body"
 import { FeedFallback } from "@/components/feed/feed-fallback"
-import { FeedList } from "@/components/feed/feed-list"
-import { FriendsRail } from "@/components/feed/friends-rail"
 import { listFriendsFeed } from "@/lib/activity/queries"
 import { requireSession } from "@/lib/auth/util/session"
 import { listFriendsWithReading } from "@/lib/friends/queries"
@@ -31,21 +30,13 @@ async function FeedContent({
   ])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-6 lg:overflow-hidden">
-      <FriendsRail friends={friends} variant="chips" />
-
-      <div className="flex min-h-0 flex-1 flex-col gap-8 lg:flex-row lg:gap-10">
-        <FriendsRail friends={friends} variant="rail" />
-
-        <FeedList
-          initialItems={feed.items}
-          initialCursor={feed.nextCursor}
-          friendCount={friends.length}
-          deepLinkActivityId={deepLinkActivityId}
-          deepLinkOpenComments={openComments}
-        />
-      </div>
-    </div>
+    <FeedBody
+      friends={friends}
+      initialItems={feed.items}
+      initialCursor={feed.nextCursor}
+      deepLinkActivityId={deepLinkActivityId}
+      deepLinkOpenComments={openComments}
+    />
   )
 }
 

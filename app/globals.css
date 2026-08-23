@@ -137,6 +137,36 @@
   }
 }
 
+/** Break out of a centered column so scrollbars sit on the viewport edge. */
+@utility bleed-viewport-x {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+@utility scrollbar-visible {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+  }
+}
+
 @keyframes auth-hero-drift {
   from {
     transform: scale(1.08) translate3d(0, 0, 0);
