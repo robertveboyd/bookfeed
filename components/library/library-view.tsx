@@ -1,11 +1,9 @@
 import Link from "next/link"
-import type { ReactNode } from "react"
 
 import { BookCover } from "@/components/catalog/book-cover"
 import { BookTile } from "@/components/catalog/book-tile"
 import { TopBooksEditor } from "@/components/library/top-books-editor"
 import { buttonVariants } from "@/components/ui/button"
-import { EmptyState } from "@/components/ui/empty-state"
 import type { BookTile as BookTileData } from "@/lib/books/types"
 import type { LibraryEntryTile, LibraryLists } from "@/lib/library/types"
 import type { TopBookSlot } from "@/lib/users/top-books/types"
@@ -152,26 +150,15 @@ function SectionHeading({
   )
 }
 
-function EmptyRow({ children }: { children: ReactNode }) {
-  return (
-    <div className="text-muted-foreground flex flex-col items-start gap-3 border-t border-dashed border-border/80 pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-      <p>{children}</p>
-      <CatalogCta label="Browse catalog" variant="outline" />
-    </div>
-  )
-}
-
 function LibraryGridSection({
   title,
   description,
   entries,
-  empty,
   tileSize = "md",
 }: {
   title: string
   description?: string
   entries: LibraryEntryTile[]
-  empty: string
   tileSize?: "sm" | "md"
 }) {
   return (
@@ -181,47 +168,18 @@ function LibraryGridSection({
         count={entries.length}
         description={description}
       />
-      {entries.length === 0 ? (
-        <EmptyRow>{empty}</EmptyRow>
-      ) : (
-        <div className="flex flex-wrap gap-x-3 gap-y-5 sm:gap-x-4 sm:gap-y-6">
-          {entries.map((entry, index) => (
-            <div
-              key={entry.id}
-              className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 motion-reduce:animate-none"
-              style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
-            >
-              <BookTile book={entry.book} size={tileSize} />
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  )
-}
-
-function FullyEmptyLibrary() {
-  return (
-    <div className="flex min-h-0 flex-1 flex-col gap-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Your library</h1>
-        <p className="text-muted-foreground text-sm">
-          What you&apos;re reading, what you&apos;ve finished, and what&apos;s
-          next.
-        </p>
+      <div className="flex flex-wrap gap-x-3 gap-y-5 sm:gap-x-4 sm:gap-y-6">
+        {entries.map((entry, index) => (
+          <div
+            key={entry.id}
+            className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 motion-reduce:animate-none"
+            style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
+          >
+            <BookTile book={entry.book} size={tileSize} />
+          </div>
+        ))}
       </div>
-
-      <EmptyState
-        className="min-h-0 flex-1 items-center justify-center text-center"
-        title="Your library is empty"
-        description="Save books you’re curious about, track what you’re reading, and keep a history of finished titles."
-        action={{
-          href: "/books",
-          label: "Explore the catalog",
-          variant: "default",
-        }}
-      />
-    </div>
+    </section>
   )
 }
 
@@ -231,14 +189,7 @@ type LibraryViewProps = {
 }
 
 export function LibraryView({ lists, topBooks }: LibraryViewProps) {
-  const isEmpty =
-    !lists.reading && lists.read.length === 0 && lists.interested.length === 0
-
   const readBooks: BookTileData[] = lists.read.map((e) => e.book)
-
-  if (isEmpty) {
-    return <FullyEmptyLibrary />
-  }
 
   return (
     <div className="space-y-12">
@@ -254,20 +205,22 @@ export function LibraryView({ lists, topBooks }: LibraryViewProps) {
 
       <TopBooksEditor initialSlots={topBooks} readBooks={readBooks} />
 
-      <LibraryGridSection
-        title="Read"
-        description="Books you've finished"
-        entries={lists.read}
-        empty="No finished books yet."
-      />
+      {lists.read.length > 0 ? (
+        <LibraryGridSection
+          title="Read"
+          description="Books you've finished"
+          entries={lists.read}
+        />
+      ) : null}
 
-      <LibraryGridSection
-        title="Interested"
-        description="Your shortlist for later"
-        entries={lists.interested}
-        empty="Nothing saved for later yet."
-        tileSize="sm"
-      />
+      {lists.interested.length > 0 ? (
+        <LibraryGridSection
+          title="Interested"
+          description="Your shortlist for later"
+          entries={lists.interested}
+          tileSize="sm"
+        />
+      ) : null}
     </div>
   )
 }
