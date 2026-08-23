@@ -28,12 +28,30 @@ import { REVIEW_BODY_MAX } from "../../lib/reviews/types"
 import { normalizeEmail, normalizeUsername } from "../../lib/users/util/normalize"
 import { hashPassword } from "../../lib/users/util/password"
 import { demoConfig } from "./config"
+import {
+  DEMO_ACCEPTED_FRIEND_COUNT,
+  DEMO_TOTAL_FRIENDS,
+  SHOWCASE_USERNAME,
+  buildLibraries,
+  generateEngagement,
+  summarizeLibraries,
+  type CommentJson,
+  type LibraryJson,
+  type LikeJson,
+} from "./generate-data"
 
-const EXPECTED_USER_COUNT = 12
+const EXPECTED_USER_COUNT = 1 + DEMO_TOTAL_FRIENDS
 const FINISH_BEFORE_RATE_DAYS = 3
 const FRIENDSHIP_DAYS_AGO = 60
 const USER_CREATED_DAYS_AGO = 90
-const PENDING_INCOMING_FRIENDS = ["maya", "zoe"] as const
+const PENDING_INCOMING_FRIENDS = ["maya", "zoe", "priya"] as const
+const PENDING_OUTGOING_FRIENDS = ["nina", "theo"] as const
+
+const PENDING_FRIEND_USERNAMES = new Set(
+  [...PENDING_INCOMING_FRIENDS, ...PENDING_OUTGOING_FRIENDS].map((username) =>
+    normalizeUsername(username),
+  ),
+)
 
 type ActivityType = (typeof ACTIVITY_TYPES)[number]
 
@@ -43,35 +61,6 @@ type UserJson = {
   name: string
   bio?: string
   showcase?: boolean
-}
-
-type ReadBookJson = {
-  title: string
-  rating?: number
-  review?: string
-  daysAgo: number
-}
-
-type LibraryJson = {
-  currentlyReading: { title: string; daysAgo: number }
-  read: ReadBookJson[]
-  interested?: string[]
-  top5?: string[]
-}
-
-type CommentJson = {
-  author: string
-  on: { username: string; title: string; type: string }
-  body: string
-  daysAgo: number
-  likedBy?: string[]
-}
-
-type LikeJson = {
-  username: string
-  title: string
-  type: string
-  likedBy: string[]
 }
 
 const dir = dirname(fileURLToPath(import.meta.url))
@@ -238,11 +227,10 @@ function validateUsers(raw: UserJson[]) {
 
 function collectTitles(libraries: Record<string, LibraryJson>): string[] {
   const titles = new Set<string>()
-  for (const [username, library] of Object.entries(libraries)) {
-    if (!library?.currentlyReading?.title) {
-      throw new Error(`${username}: currentlyReading.title is required`)
+  for (const library of Object.values(libraries)) {
+    if (library.currentlyReading?.title) {
+      titles.add(library.currentlyReading.title)
     }
-    titles.add(library.currentlyReading.title)
     for (const book of library.read ?? []) {
       titles.add(book.title)
     }
@@ -259,7 +247,11 @@ function collectTitles(libraries: Record<string, LibraryJson>): string[] {
 function plannedActivityKeys(libraries: Record<string, LibraryJson>): Set<string> {
   const keys = new Set<string>()
   for (const [username, library] of Object.entries(libraries)) {
-    keys.add(activityKey(username, library.currentlyReading.title, "started_reading"))
+    if (library.currentlyReading) {
+      keys.add(
+        activityKey(username, library.currentlyReading.title, "started_reading"),
+      )
+    }
     for (const book of library.read) {
       keys.add(activityKey(username, book.title, "finished_reading"))
       if (book.rating == null) continue
@@ -349,9 +341,11 @@ function assertLibraryShape(
   if (!userSet.has(username)) {
     throw new Error(`libraries.json has "${username}" who is not in users.json`)
   }
-  requireIntDays(library.currentlyReading.daysAgo, `${username} currentlyReading`)
-  if (!Array.isArray(library.read) || library.read.length === 0) {
-    throw new Error(`${username}: read must be a non-empty array`)
+  if (library.currentlyReading) {
+    requireIntDays(library.currentlyReading.daysAgo, `${username} currentlyReading`)
+  }
+  if (!Array.isArray(library.read)) {
+    throw new Error(`${username}: read must be an array`)
   }
 
   const used = new Set<string>()
@@ -366,7 +360,9 @@ function assertLibraryShape(
     used.add(key)
   }
 
-  mark(library.currentlyReading.title, "currentlyReading")
+  if (library.currentlyReading) {
+    mark(library.currentlyReading.title, "currentlyReading")
+  }
   const readKeys = new Set<string>()
   for (const book of library.read) {
     mark(book.title, "read")
@@ -406,22 +402,15 @@ async function seed() {
   }
 
   const userRows = loadJson<UserJson[]>("users.json")
-  const libraries = loadJson<Record<string, LibraryJson>>("libraries.json")
-  const comments = loadJson<CommentJson[]>("comments.json")
-  const likes = loadJson<LikeJson[]>("likes.json")
+  const libraryOverrides = loadJson<Record<string, LibraryJson>>("libraries.json")
 
   const { showcaseUsername, showcaseEmail } = validateUsers(userRows)
   const userSet = new Set(userRows.map((u) => normalizeUsername(u.username)))
+  const allUsernames = [...userSet]
 
-  for (const username of userSet) {
-    if (!libraries[username]) {
-      throw new Error(`libraries.json is missing ${username}`)
-    }
+  if (normalizeUsername(showcaseUsername) !== SHOWCASE_USERNAME) {
+    throw new Error(`Showcase user must be "${SHOWCASE_USERNAME}"`)
   }
-  for (const [username, library] of Object.entries(libraries)) {
-    assertLibraryShape(username, library, userSet)
-  }
-  assertEngageRefs(comments, likes, userSet, plannedActivityKeys(libraries))
 
   const sql = neon(process.env.DATABASE_URL)
   const db = drizzle(sql)
@@ -430,6 +419,40 @@ async function seed() {
   if (catalog.length === 0) {
     throw new Error("Catalog is empty. Run `pnpm db:seed` first.")
   }
+
+  const catalogTitles = catalog.map((row) => row.title)
+  const libraries = buildLibraries(allUsernames, catalogTitles, libraryOverrides)
+  const friendUsernames = allUsernames.filter((u) => u !== showcaseUsername)
+  if (friendUsernames.length !== DEMO_TOTAL_FRIENDS) {
+    throw new Error(
+      `Expected ${DEMO_TOTAL_FRIENDS} friends for ${showcaseUsername}, got ${friendUsernames.length}`,
+    )
+  }
+  const acceptedFriendUsernames = friendUsernames.filter(
+    (username) => !PENDING_FRIEND_USERNAMES.has(username),
+  )
+  if (acceptedFriendUsernames.length !== DEMO_ACCEPTED_FRIEND_COUNT) {
+    throw new Error(
+      `Expected ${DEMO_ACCEPTED_FRIEND_COUNT} accepted friends, got ${acceptedFriendUsernames.length}`,
+    )
+  }
+  const { comments, likes } = generateEngagement({
+    libraries,
+    showcaseUsername,
+    friendUsernames: acceptedFriendUsernames,
+    allUsernames,
+  })
+  const librarySummary = summarizeLibraries(libraries)
+
+  for (const username of userSet) {
+    if (!libraries[username]) {
+      throw new Error(`No library generated for ${username}`)
+    }
+  }
+  for (const [username, library] of Object.entries(libraries)) {
+    assertLibraryShape(username, library, userSet)
+  }
+  assertEngageRefs(comments, likes, userSet, plannedActivityKeys(libraries))
 
   const bookIdByTitle = new Map<string, string>()
   for (const row of catalog) {
@@ -489,26 +512,39 @@ async function seed() {
   const pendingIncoming = new Set(
     PENDING_INCOMING_FRIENDS.map((username) => normalizeUsername(username)),
   )
+  const pendingOutgoing = new Set(
+    PENDING_OUTGOING_FRIENDS.map((username) => normalizeUsername(username)),
+  )
   const notificationMap = new Map<string, NotificationAgg>()
   const friendRows = insertedUsers
     .filter((u) => u.username !== showcaseUsername)
-    .map((u) =>
-      pendingIncoming.has(u.username)
-        ? {
-            requesterId: u.id,
-            addresseeId: showcaseId,
-            status: "pending" as const,
-            createdAt: friendAt,
-            updatedAt: friendAt,
-          }
-        : {
-            requesterId: showcaseId,
-            addresseeId: u.id,
-            status: "accepted" as const,
-            createdAt: friendAt,
-            updatedAt: friendAt,
-          },
-    )
+    .map((u) => {
+      if (pendingIncoming.has(u.username)) {
+        return {
+          requesterId: u.id,
+          addresseeId: showcaseId,
+          status: "pending" as const,
+          createdAt: friendAt,
+          updatedAt: friendAt,
+        }
+      }
+      if (pendingOutgoing.has(u.username)) {
+        return {
+          requesterId: showcaseId,
+          addresseeId: u.id,
+          status: "pending" as const,
+          createdAt: friendAt,
+          updatedAt: friendAt,
+        }
+      }
+      return {
+        requesterId: showcaseId,
+        addresseeId: u.id,
+        status: "accepted" as const,
+        createdAt: friendAt,
+        updatedAt: friendAt,
+      }
+    })
   const insertedFriendships = await db
     .insert(friendships)
     .values(friendRows)
@@ -565,23 +601,25 @@ async function seed() {
     const userId = requireUser(username, "library")
     const library = libraries[username]
 
-    const readingBookId = requireBook(library.currentlyReading.title)
-    const readingAt = daysAgo(library.currentlyReading.daysAgo)
-    await db.insert(libraryEntries).values({
-      userId,
-      bookId: readingBookId,
-      status: "reading",
-      createdAt: readingAt,
-      updatedAt: readingAt,
-    })
-    await insertActivity({
-      username,
-      title: library.currentlyReading.title,
-      type: "started_reading",
-      actorId: userId,
-      bookId: readingBookId,
-      createdAt: readingAt,
-    })
+    if (library.currentlyReading) {
+      const readingBookId = requireBook(library.currentlyReading.title)
+      const readingAt = daysAgo(library.currentlyReading.daysAgo)
+      await db.insert(libraryEntries).values({
+        userId,
+        bookId: readingBookId,
+        status: "reading",
+        createdAt: readingAt,
+        updatedAt: readingAt,
+      })
+      await insertActivity({
+        username,
+        title: library.currentlyReading.title,
+        type: "started_reading",
+        actorId: userId,
+        bookId: readingBookId,
+        createdAt: readingAt,
+      })
+    }
 
     for (const [i, book] of library.read.entries()) {
       const bookId = requireBook(book.title)
@@ -809,6 +847,13 @@ async function seed() {
     (row) => row.recipientId === showcaseId && row.readAt == null,
   ).length
 
+  const friendReadCounts = librarySummary.rows
+    .filter((row) => row.username !== showcaseUsername)
+    .map((row) => row.read)
+  const minReads = Math.min(...friendReadCounts)
+  const maxReads = Math.max(...friendReadCounts)
+  const totalActivityLikes = likes.reduce((sum, row) => sum + row.likedBy.length, 0)
+
   console.log(
     [
       "Demo seed complete.",
@@ -818,7 +863,11 @@ async function seed() {
       `  password: ${demoConfig.password}`,
       `  profile:  /users/${showcaseUsername}`,
       "",
-      `Pending friend requests: ${PENDING_INCOMING_FRIENDS.join(", ")}`,
+      `Incoming requests: ${PENDING_INCOMING_FRIENDS.join(", ")}`,
+      `Sent requests: ${PENDING_OUTGOING_FRIENDS.join(", ")}`,
+      `Friends: ${DEMO_ACCEPTED_FRIEND_COUNT} accepted, ${PENDING_INCOMING_FRIENDS.length} incoming, ${PENDING_OUTGOING_FRIENDS.length} outgoing (${DEMO_TOTAL_FRIENDS} total connections)`,
+      `Friend libraries: avg ${librarySummary.avg.toFixed(1)} books read (range ${minReads}–${maxReads})`,
+      `Engagement: ${comments.length} comments, ${totalActivityLikes} activity likes`,
       `Notifications for showcase user: ${notificationRows.filter((row) => row.recipientId === showcaseId).length} (${showcaseUnread} unread)`,
       "",
       `(all ${EXPECTED_USER_COUNT} accounts share this password)`,

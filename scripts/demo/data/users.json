@@ -3,7 +3,7 @@
     "username": "robert",
     "email": "robert.ve.boyd@gmail.com",
     "name": "Robert Boyd",
-    "bio": "Always in the middle of something. Ask me what I’m reading.",
+    "bio": "Always in the middle of something. Ask me what I'm reading.",
     "showcase": true
   },
   {
@@ -34,13 +34,13 @@
     "username": "lena",
     "email": "lena@bookfeed.local",
     "name": "Lena Voss",
-    "bio": "Dragons, romance, and whatever’s on the nightstand."
+    "bio": "Dragons, romance, and whatever's on the nightstand."
   },
   {
     "username": "nico",
     "email": "nico@bookfeed.local",
     "name": "Nico Alvarez",
-    "bio": "Horror until it’s too late to sleep."
+    "bio": "Horror until it's too late to sleep."
   },
   {
     "username": "harper",
@@ -71,5 +71,149 @@
     "email": "zoe@bookfeed.local",
     "name": "Zoe Hart",
     "bio": "Romance with a side of contemporary chaos."
+  },
+  {
+    "username": "elena",
+    "email": "elena@bookfeed.local",
+    "name": "Elena Brooks",
+    "bio": "Memoirs, essays, and the occasional messy family saga."
+  },
+  {
+    "username": "owen",
+    "email": "owen@bookfeed.local",
+    "name": "Owen Walsh",
+    "bio": "Thrillers on planes, literary fiction at home."
+  },
+  {
+    "username": "clara",
+    "email": "clara@bookfeed.local",
+    "name": "Clara Nguyen",
+    "bio": "Book club captain energy. Always has opinions."
+  },
+  {
+    "username": "felix",
+    "email": "felix@bookfeed.local",
+    "name": "Felix Hartman",
+    "bio": "Nonfiction rabbit holes and one novel at a time."
+  },
+  {
+    "username": "nina",
+    "email": "nina@bookfeed.local",
+    "name": "Nina Okoro",
+    "bio": "YA, romantasy, and unhinged book hauls."
+  },
+  {
+    "username": "theo",
+    "email": "theo@bookfeed.local",
+    "name": "Theo Lindstrom",
+    "bio": "Classics I pretend I've read and new releases I actually finish."
+  },
+  {
+    "username": "audrey",
+    "email": "audrey@bookfeed.local",
+    "name": "Audrey Cole",
+    "bio": "Cozy mysteries and aggressively annotated paperbacks."
+  },
+  {
+    "username": "marcus",
+    "email": "marcus@bookfeed.local",
+    "name": "Marcus Chen",
+    "bio": "Biographies, business books, and one novel a quarter."
+  },
+  {
+    "username": "diana",
+    "email": "diana@bookfeed.local",
+    "name": "Diana Ruiz",
+    "bio": "Literary fiction and long walks with audiobooks."
+  },
+  {
+    "username": "kai",
+    "email": "kai@bookfeed.local",
+    "name": "Kai Nakamura",
+    "bio": "Manga, light novels, and whatever wins the group poll."
+  },
+  {
+    "username": "holly",
+    "email": "holly@bookfeed.local",
+    "name": "Holly Banks",
+    "bio": "BookTok made me do it. No regrets."
+  },
+  {
+    "username": "ben",
+    "email": "ben@bookfeed.local",
+    "name": "Ben Okafor",
+    "bio": "History nerd with a soft spot for heist novels."
+  },
+  {
+    "username": "iris",
+    "email": "iris@bookfeed.local",
+    "name": "Iris Lowell",
+    "bio": "Poetry before bed, thrillers on vacation."
+  },
+  {
+    "username": "luca",
+    "email": "luca@bookfeed.local",
+    "name": "Luca Romano",
+    "bio": "Italian crime fiction and espresso-fueled reading sprints."
+  },
+  {
+    "username": "simone",
+    "email": "simone@bookfeed.local",
+    "name": "Simone Archer",
+    "bio": "Essays, memoirs, and the occasional rom-com."
+  },
+  {
+    "username": "grant",
+    "email": "grant@bookfeed.local",
+    "name": "Grant Ellis",
+    "bio": "Western canon guilt and contemporary shortcuts."
+  },
+  {
+    "username": "paige",
+    "email": "paige@bookfeed.local",
+    "name": "Paige Morrison",
+    "bio": "Bookstagram angles and underlined paperbacks."
+  },
+  {
+    "username": "ren",
+    "email": "ren@bookfeed.local",
+    "name": "Ren Park",
+    "bio": "Quiet literary slices of life and big fantasy epics."
+  },
+  {
+    "username": "tessa",
+    "email": "tessa@bookfeed.local",
+    "name": "Tessa Wright",
+    "bio": "Romance arcs and found-family sci-fi."
+  },
+  {
+    "username": "vik",
+    "email": "vik@bookfeed.local",
+    "name": "Vik Sharma",
+    "bio": "Philosophy bro who secretly reads romance."
+  },
+  {
+    "username": "wren",
+    "email": "wren@bookfeed.local",
+    "name": "Wren Delacroix",
+    "bio": "Gothic everything. Candle optional, mood required."
+  },
+  {
+    "username": "yasmin",
+    "email": "yasmin@bookfeed.local",
+    "name": "Yasmin Ali",
+    "bio": "Own-voices fiction and sharp cultural criticism."
+  },
+  {
+    "username": "caleb",
+    "email": "caleb@bookfeed.local",
+    "name": "Caleb Nguyen",
+    "bio": "Sports nonfiction and comfort rereads."
+  },
+  {
+    "username": "daphne",
+    "email": "daphne@bookfeed.local",
+    "name": "Daphne Cho",
+    "bio": "K-drama tie-ins and books that make you cry in public."
   }
 ]
