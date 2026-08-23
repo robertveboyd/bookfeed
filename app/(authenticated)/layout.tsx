@@ -39,7 +39,7 @@ export default async function Layout({
         user={headerUser}
         unreadNotificationCount={unreadNotificationCount}
       />
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8">
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col min-h-0 overflow-y-auto px-4 py-8">
         {children}
       </main>
     </>

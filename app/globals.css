@@ -129,6 +129,14 @@
   }
 }
 
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @keyframes auth-hero-drift {
   from {
     transform: scale(1.08) translate3d(0, 0, 0);

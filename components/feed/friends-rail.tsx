@@ -88,16 +88,11 @@ export function FriendsRail({ friends, variant }: FriendsRailProps) {
   }
 
   return (
-    <aside
-      className={cn(
-        "hidden w-52 shrink-0 xl:w-64",
-        friends.length === 0 ? "lg:flex lg:min-h-0 lg:flex-col" : "lg:block",
-      )}
-    >
+    <aside className="hidden w-52 shrink-0 lg:flex lg:min-h-0 lg:flex-col xl:w-64">
       {friends.length === 0 ? (
         <FriendsEmpty className="min-h-0 flex-1" />
       ) : (
-        <div className="sticky top-20">
+        <div className="scrollbar-hidden min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
           <ul className="grid grid-cols-2 gap-x-2 gap-y-4 xl:grid-cols-3">
             {friends.map((friend) => (
               <li key={friend.id} className="min-w-0">

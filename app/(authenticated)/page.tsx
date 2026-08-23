@@ -31,20 +31,13 @@ async function FeedContent({
   ])
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Feed</h1>
-        <p className="text-muted-foreground text-sm">
-          What you and your friends are reading.
-        </p>
-      </div>
-
+    <div className="flex min-h-0 flex-1 flex-col gap-6 lg:overflow-hidden">
       <FriendsRail friends={friends} variant="chips" />
 
-      <div className="flex min-h-0 flex-1 gap-8 lg:gap-10">
+      <div className="flex min-h-0 flex-1 flex-col gap-8 lg:flex-row lg:gap-10">
         <FriendsRail friends={friends} variant="rail" />
 
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="scrollbar-hidden flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain">
           <FeedList
             initialItems={feed.items}
             initialCursor={feed.nextCursor}
@@ -67,11 +60,13 @@ export default async function Page({ searchParams }: PageProps) {
   const openComments = params.comments === "1"
 
   return (
-    <Suspense fallback={<FeedFallback />}>
-      <FeedContent
-        deepLinkActivityId={deepLinkActivityId}
-        openComments={openComments}
-      />
-    </Suspense>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <Suspense fallback={<FeedFallback />}>
+        <FeedContent
+          deepLinkActivityId={deepLinkActivityId}
+          openComments={openComments}
+        />
+      </Suspense>
+    </div>
   )
 }
