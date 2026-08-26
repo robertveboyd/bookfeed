@@ -124,6 +124,16 @@ const TITLE_THREADS: Record<string, ConversationThread[]> = {
           body: () =>
             "the POV switching confused me at first too — it clicks around a third in",
         },
+        {
+          speakerSlot: 1,
+          body: () =>
+            "meanwhile I'm still pretending the next A Song of Ice and Fire book drops this year",
+        },
+        {
+          speakerSlot: 0,
+          body: () =>
+            "respectfully that is the bravest sentence in this thread",
+        },
       ],
     },
   ],
@@ -776,38 +786,74 @@ export const CURATED_THREAD_SPECS: Record<
     {
       author: "jordan",
       body: "you finally picked up A Game of Thrones — about time",
-      daysAgo: 2,
+      daysAgo: 0,
       likedBy: ["robert", "sam", "maya"],
     },
     {
       author: "robert",
       body: "page 150 and I already need a family tree bookmark",
-      daysAgo: 2,
+      daysAgo: 0,
       likedBy: ["jordan", "harper"],
     },
     {
       author: "sam",
       body: "does the POV switching click yet or still disorienting?",
-      daysAgo: 1,
+      daysAgo: 0,
       likedBy: ["robert", "jordan"],
     },
     {
       author: "robert",
-      body: "starting to gel. Tyrion's chapter hooked me — please no spoilers from here",
-      daysAgo: 1,
+      body: "starting to gel. Tyrion's chapters hooked me — please no spoilers from here",
+      daysAgo: 0,
       likedBy: ["sam", "maya", "jordan"],
     },
     {
       author: "maya",
       body: "we'll behave. worth reading before the show or doesn't matter?",
-      daysAgo: 1,
+      daysAgo: 0,
       likedBy: ["robert", "sam"],
     },
     {
       author: "harper",
       body: "book first if you can — the foreshadowing hits different",
-      daysAgo: 1,
+      daysAgo: 0,
       likedBy: ["robert", "maya"],
+    },
+    {
+      author: "zoe",
+      body: "pro tip: the maps at the front are not decorative. I learned that the hard way",
+      daysAgo: 0,
+      likedBy: ["robert", "harper", "sam"],
+    },
+    {
+      author: "robert",
+      body: "already flipping back to the map every other chapter. no notes",
+      daysAgo: 0,
+      likedBy: ["zoe", "jordan"],
+    },
+    {
+      author: "jordan",
+      body: "enjoy book one while it lasts. I'm over here refreshing for the next A Song of Ice and Fire like George is definitely finishing it this year",
+      daysAgo: 0,
+      likedBy: ["sam", "maya", "harper", "zoe"],
+    },
+    {
+      author: "sam",
+      body: "\"this year\" — bold. I've been saying that since before half this group had library cards",
+      daysAgo: 0,
+      likedBy: ["jordan", "robert", "lena"],
+    },
+    {
+      author: "robert",
+      body: "don't crush the optimism. I'm still early enough to pretend the series is just… ongoing",
+      daysAgo: 0,
+      likedBy: ["sam", "jordan"],
+    },
+    {
+      author: "lena",
+      body: "best mindset for book one honestly. go slow. winter can wait",
+      daysAgo: 0,
+      likedBy: ["robert", "maya", "zoe"],
     },
   ],
   "robert|pachinko|reviewed": [
