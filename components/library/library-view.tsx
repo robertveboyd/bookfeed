@@ -203,7 +203,9 @@ export function LibraryView({ lists, topBooks }: LibraryViewProps) {
 
       <CurrentlyReading entry={lists.reading} />
 
-      <TopBooksEditor initialSlots={topBooks} readBooks={readBooks} />
+      {readBooks.length > 0 ? (
+        <TopBooksEditor initialSlots={topBooks} readBooks={readBooks} />
+      ) : null}
 
       {lists.read.length > 0 ? (
         <LibraryGridSection

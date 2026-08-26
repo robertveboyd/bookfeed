@@ -1,7 +1,6 @@
 "use client"
 
 import { PlusIcon, XIcon } from "lucide-react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   useEffect,
@@ -270,43 +269,7 @@ export function TopBooksEditor({
     ) : null
 
   if (readBooks.length === 0) {
-    return (
-      <section className="space-y-4">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold tracking-tight">Top 5</h2>
-          <p className="text-muted-foreground text-sm">
-            Finish some books, then pick up to five favorites to show on your
-            profile.
-          </p>
-        </div>
-        <div className="sm:hidden">
-          <HorizontalScroller bleed aria-label="Top 5">
-            <div className="w-24 shrink-0">
-              <div className="border-border bg-muted/40 flex aspect-[2/3] items-center justify-center rounded-md border border-dashed">
-                <PlusIcon className="text-muted-foreground size-7 opacity-50" />
-              </div>
-              <p className="text-muted-foreground mt-2 text-sm">Add book</p>
-            </div>
-          </HorizontalScroller>
-        </div>
-        <div className="hidden flex-wrap gap-x-3 gap-y-5 sm:flex sm:gap-x-4">
-          <div className="w-32">
-            <div className="border-border bg-muted/40 flex aspect-[2/3] items-center justify-center rounded-md border border-dashed">
-              <PlusIcon className="text-muted-foreground size-8 opacity-50" />
-            </div>
-            <p className="text-muted-foreground mt-2 text-sm">Add book</p>
-          </div>
-        </div>
-        <p>
-          <Link
-            href="/books"
-            className="text-sm font-medium underline-offset-4 hover:underline"
-          >
-            Browse catalog to finish a book →
-          </Link>
-        </p>
-      </section>
-    )
+    return null
   }
 
   return (
