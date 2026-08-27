@@ -18,27 +18,39 @@ function PersonCard({
   user,
   actions,
   reading,
+  showHoverPreview = false,
 }: {
   user: { id: string; username: string; image: string | null }
   actions: ReactNode
   reading?: CurrentlyReadingBook | null
+  showHoverPreview?: boolean
 }) {
+  const profileLinkClass =
+    "flex w-full min-w-0 flex-col items-center gap-2 hover:opacity-90"
+
+  const profileContent = (
+    <>
+      <UserAvatarWithReadingBadge
+        userId={user.id}
+        username={user.username}
+        imageUrl={user.image}
+        size={56}
+        reading={reading}
+      />
+      <span className="w-full truncate text-center text-sm font-medium">
+        @{user.username}
+      </span>
+    </>
+  )
+
   return (
     <li className="flex flex-col items-center gap-3 rounded-xl border border-border/80 px-3 py-4">
       <FriendHoverCard
         user={user}
-        className="flex w-full min-w-0 flex-col items-center gap-2 hover:opacity-90"
+        enabled={showHoverPreview}
+        className={profileLinkClass}
       >
-        <UserAvatarWithReadingBadge
-          userId={user.id}
-          username={user.username}
-          imageUrl={user.image}
-          size={56}
-          reading={reading}
-        />
-        <span className="w-full truncate text-center text-sm font-medium">
-          @{user.username}
-        </span>
+        {profileContent}
       </FriendHoverCard>
       {actions}
     </li>
@@ -61,6 +73,7 @@ export function FriendsSearchResults({ hits }: { hits: UserSearchHit[] }) {
         <PersonCard
           key={hit.id}
           user={hit}
+          showHoverPreview={hit.relation === "friends"}
           actions={
             <FriendshipActions
               userId={hit.id}
@@ -122,6 +135,7 @@ export function FriendshipList({
             key={friendship.id}
             user={user}
             reading={readingByUserId?.get(user.id)}
+            showHoverPreview={mode === "friends"}
             actions={
               <FriendshipActions
                 userId={user.id}

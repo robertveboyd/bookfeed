@@ -24,6 +24,8 @@ type FriendHoverCardProps = {
   user: { id: string; username: string; image: string | null }
   className?: string
   children: ReactNode
+  /** When false, renders a profile link only (no library preview on hover). */
+  enabled?: boolean
 }
 
 function booksReadLabel(count: number) {
@@ -105,6 +107,7 @@ export function FriendHoverCard({
   user,
   className,
   children,
+  enabled = true,
 }: FriendHoverCardProps) {
   const [preview, setPreview] = useState<UserHoverPreview | null>(
     () => previewCache.get(user.id) ?? null,
@@ -124,6 +127,17 @@ export function FriendHoverCard({
       previewCache.set(user.id, result.preview)
       setPreview(result.preview)
     })
+  }
+
+  if (!enabled) {
+    return (
+      <Link
+        href={`/users/${user.username}`}
+        className={cn("touch-manipulation", className)}
+      >
+        {children}
+      </Link>
+    )
   }
 
   return (
