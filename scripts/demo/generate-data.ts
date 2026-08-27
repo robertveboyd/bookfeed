@@ -41,6 +41,8 @@ export type ReadBookJson = {
   rating?: number
   review?: string
   daysAgo: number
+  /** If set, also seed a started_reading activity this many days ago. */
+  startedDaysAgo?: number
 }
 
 export type LibraryJson = {
@@ -158,6 +160,26 @@ function mergeCuratedBooks(libraries: Record<string, LibraryJson>) {
       }
     }
     library.read.sort((a, b) => a.daysAgo - b.daysAgo)
+  }
+}
+
+/** Demo showcase titles that should always show a perfect aggregate. */
+const FORCED_FIVE_STAR_TITLES = new Set([titleKey("A Game of Thrones")])
+
+function forceFiveStarRatings(libraries: Record<string, LibraryJson>) {
+  for (const [username, library] of Object.entries(libraries)) {
+    const normalized = normalizeUsername(username)
+    for (const book of library.read) {
+      if (!FORCED_FIVE_STAR_TITLES.has(titleKey(book.title))) continue
+      // Showcase user rates A Game of Thrones live during the demo.
+      if (
+        normalized === SHOWCASE_USERNAME &&
+        titleKey(book.title) === titleKey("A Game of Thrones")
+      ) {
+        continue
+      }
+      book.rating = 5
+    }
   }
 }
 
@@ -285,6 +307,7 @@ export function buildLibraries(
   }
 
   mergeCuratedBooks(libraries)
+  forceFiveStarRatings(libraries)
   applyCurrentlyReadingGaps(
     libraries,
     usernames.filter((username) => normalizeUsername(username) !== SHOWCASE_USERNAME),
@@ -317,11 +340,22 @@ function listActivities(
       })
     }
     for (const book of library.read) {
+      if (book.startedDaysAgo != null) {
+        refs.push({
+          username: normalized,
+          title: book.title,
+          type: "started_reading",
+          daysAgo: book.startedDaysAgo,
+          isShowcase,
+          isFriend,
+        })
+      }
       refs.push({
         username: normalized,
         title: book.title,
         type: "finished_reading",
-        daysAgo: book.daysAgo + 3,
+        daysAgo:
+          book.startedDaysAgo != null ? book.daysAgo : book.daysAgo + 3,
         isShowcase,
         isFriend,
       })

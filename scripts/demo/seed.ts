@@ -253,6 +253,9 @@ function plannedActivityKeys(libraries: Record<string, LibraryJson>): Set<string
       )
     }
     for (const book of library.read) {
+      if (book.startedDaysAgo != null) {
+        keys.add(activityKey(username, book.title, "started_reading"))
+      }
       keys.add(activityKey(username, book.title, "finished_reading"))
       if (book.rating == null) continue
       const type = trimBody(book.review) ? "reviewed" : "rated"
@@ -368,6 +371,17 @@ function assertLibraryShape(
     mark(book.title, "read")
     readKeys.add(titleKey(book.title))
     requireIntDays(book.daysAgo, `${username} read "${book.title}"`)
+    if (book.startedDaysAgo != null) {
+      requireIntDays(
+        book.startedDaysAgo,
+        `${username} read "${book.title}" startedDaysAgo`,
+      )
+      if (book.startedDaysAgo < book.daysAgo) {
+        throw new Error(
+          `${username}: "${book.title}" startedDaysAgo must be >= daysAgo (finish)`,
+        )
+      }
+    }
     const body = trimBody(book.review)
     if (body && book.rating == null) {
       throw new Error(`${username}: "${book.title}" has a review but no rating`)
@@ -624,7 +638,22 @@ async function seed() {
     for (const [i, book] of library.read.entries()) {
       const bookId = requireBook(book.title)
       const ratedAt = daysAgo(book.daysAgo, i)
-      const finishedAt = daysAgo(book.daysAgo + FINISH_BEFORE_RATE_DAYS, i)
+      const finishedAt =
+        book.startedDaysAgo != null
+          ? daysAgo(book.daysAgo, i)
+          : daysAgo(book.daysAgo + FINISH_BEFORE_RATE_DAYS, i)
+
+      if (book.startedDaysAgo != null) {
+        await insertActivity({
+          username,
+          title: book.title,
+          type: "started_reading",
+          actorId: userId,
+          bookId,
+          createdAt: daysAgo(book.startedDaysAgo, i),
+        })
+      }
+
       await db.insert(libraryEntries).values({
         userId,
         bookId,

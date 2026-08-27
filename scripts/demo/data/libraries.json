@@ -1,10 +1,15 @@
 {
   "robert": {
     "currentlyReading": {
-      "title": "A Game of Thrones",
-      "daysAgo": 0
+      "title": "The Left Hand of Darkness",
+      "daysAgo": 1
     },
     "read": [
+      {
+        "title": "A Game of Thrones",
+        "startedDaysAgo": 2,
+        "daysAgo": 0
+      },
       {
         "title": "Dune",
         "rating": 5,
