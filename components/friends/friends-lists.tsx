@@ -1,10 +1,11 @@
 import type { ReactNode } from "react"
 
 import { FriendshipActions } from "@/components/friends/friendship-actions"
-import { UserAvatar } from "@/components/profile/user-avatar"
+import { UserAvatarWithReadingBadge } from "@/components/profile/user-avatar-with-reading-badge"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FriendHoverCard } from "@/components/users/friend-hover-card"
 import type {
+  CurrentlyReadingBook,
   FriendshipWithUser,
   UserSearchHit,
 } from "@/lib/friends/types"
@@ -16,9 +17,11 @@ const peopleGridClass =
 function PersonCard({
   user,
   actions,
+  reading,
 }: {
   user: { id: string; username: string; image: string | null }
   actions: ReactNode
+  reading?: CurrentlyReadingBook | null
 }) {
   return (
     <li className="flex flex-col items-center gap-3 rounded-xl border border-border/80 px-3 py-4">
@@ -26,11 +29,12 @@ function PersonCard({
         user={user}
         className="flex w-full min-w-0 flex-col items-center gap-2 hover:opacity-90"
       >
-        <UserAvatar
+        <UserAvatarWithReadingBadge
           userId={user.id}
           username={user.username}
           imageUrl={user.image}
           size={56}
+          reading={reading}
         />
         <span className="w-full truncate text-center text-sm font-medium">
           @{user.username}
@@ -77,6 +81,7 @@ export function FriendshipList({
   empty,
   mode,
   fillEmpty = false,
+  readingByUserId,
 }: {
   items: FriendshipWithUser[]
   empty: {
@@ -86,6 +91,7 @@ export function FriendshipList({
   }
   mode: "incoming" | "outgoing" | "friends"
   fillEmpty?: boolean
+  readingByUserId?: Map<string, CurrentlyReadingBook>
 }) {
   if (items.length === 0) {
     return (
@@ -115,6 +121,7 @@ export function FriendshipList({
           <PersonCard
             key={friendship.id}
             user={user}
+            reading={readingByUserId?.get(user.id)}
             actions={
               <FriendshipActions
                 userId={user.id}

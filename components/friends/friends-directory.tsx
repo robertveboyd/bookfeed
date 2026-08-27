@@ -1,6 +1,7 @@
 import { FriendshipList } from "@/components/friends/friends-lists"
 import { requireSession } from "@/lib/auth/util/session"
 import {
+  getCurrentlyReadingByUserIds,
   listFriends,
   listIncomingPending,
   listOutgoingPending,
@@ -13,6 +14,9 @@ export async function FriendsDirectory() {
     listOutgoingPending(session.user.id),
     listFriends(session.user.id),
   ])
+  const readingByUserId = await getCurrentlyReadingByUserIds(
+    friends.map((friend) => friend.user.id),
+  )
 
   const directoryEmpty =
     friends.length === 0 && incoming.length === 0 && outgoing.length === 0
@@ -31,6 +35,7 @@ export async function FriendsDirectory() {
           items={friends}
           mode="friends"
           fillEmpty={directoryEmpty}
+          readingByUserId={readingByUserId}
           empty={{
             title: "No friends yet",
             description:

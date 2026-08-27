@@ -4,6 +4,7 @@ import { alias } from "drizzle-orm/pg-core"
 import { db } from "@/lib/db"
 import { friendships, libraryEntries, books, users } from "@/lib/db/schema"
 import type {
+  CurrentlyReadingBook,
   FriendRailItem,
   FriendUser,
   Friendship,
@@ -188,13 +189,11 @@ export async function listFriends(
     )
 }
 
-export async function listFriendsWithReading(
-  userId: string,
-): Promise<FriendRailItem[]> {
-  const friends = await listFriends(userId)
-  if (friends.length === 0) return []
+export async function getCurrentlyReadingByUserIds(
+  userIds: string[],
+): Promise<Map<string, CurrentlyReadingBook>> {
+  if (userIds.length === 0) return new Map()
 
-  const friendIds = friends.map((f) => f.user.id)
   const readingRows = await db
     .select({
       userId: libraryEntries.userId,
@@ -206,12 +205,12 @@ export async function listFriendsWithReading(
     .innerJoin(books, eq(books.id, libraryEntries.bookId))
     .where(
       and(
-        inArray(libraryEntries.userId, friendIds),
+        inArray(libraryEntries.userId, userIds),
         eq(libraryEntries.status, "reading"),
       ),
     )
 
-  const readingByUser = new Map(
+  return new Map(
     readingRows.map((row) => [
       row.userId,
       {
@@ -220,6 +219,17 @@ export async function listFriendsWithReading(
         coverImageId: row.coverImageId,
       },
     ]),
+  )
+}
+
+export async function listFriendsWithReading(
+  userId: string,
+): Promise<FriendRailItem[]> {
+  const friends = await listFriends(userId)
+  if (friends.length === 0) return []
+
+  const readingByUser = await getCurrentlyReadingByUserIds(
+    friends.map((f) => f.user.id),
   )
 
   return friends.map(({ user }) => ({

@@ -34,12 +34,14 @@ export type UserSearchHit = FriendUser & {
   friendshipId: string | null
 }
 
+export type CurrentlyReadingBook = {
+  bookId: string
+  title: string
+  coverImageId: string
+}
+
 export type FriendRailItem = FriendUser & {
-  reading: {
-    bookId: string
-    title: string
-    coverImageId: string
-  } | null
+  reading: CurrentlyReadingBook | null
 }
 
 export type FriendActionResult =
