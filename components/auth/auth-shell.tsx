@@ -8,7 +8,7 @@ type AuthShellProps = {
   title: string
   description: string
   children: React.ReactNode
-  footer: React.ReactNode
+  footer?: React.ReactNode
 }
 
 export function AuthShell({
@@ -65,7 +65,9 @@ export function AuthShell({
 
           {children}
 
-          <div className="text-muted-foreground text-sm">{footer}</div>
+          {footer ? (
+            <div className="text-muted-foreground text-sm">{footer}</div>
+          ) : null}
         </div>
       </div>
     </div>

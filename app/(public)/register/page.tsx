@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 
 import { AuthShell } from "@/components/auth/auth-shell"
 import { RegisterForm } from "@/components/auth/register-form"
@@ -9,6 +10,11 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
+  // Closed-beta gate — remove at public launch.
+  if (process.env.NODE_ENV === "production") {
+    redirect("/sign-in")
+  }
+
   return (
     <AuthShell
       title="Create account"

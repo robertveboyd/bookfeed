@@ -295,6 +295,26 @@ const TITLE_THREADS: Record<string, ConversationThread[]> = {
       ],
     },
   ],
+  [titleKey("The Catcher in the Rye")]: [
+    {
+      turns: [
+        {
+          speakerSlot: 0,
+          body: (book) =>
+            `rereading ${book.title} as an adult — Holden is somehow more exhausting and more sympathetic`,
+        },
+        {
+          speakerSlot: 1,
+          body: () => "does the slang still land or feel like a time capsule",
+        },
+        {
+          speakerSlot: 0,
+          body: () =>
+            "both. the phonies line hits different when you know half the people in your feed",
+        },
+      ],
+    },
+  ],
   [titleKey("The Left Hand of Darkness")]: [
     {
       turns: [
@@ -826,6 +846,26 @@ export const CURATED_THREAD_SPECS: Record<
       body: "O jordan, you sweet summer child.  That book will never be finished",
       daysAgo: 0,
       likedBy: ["jordan", "robert"],
+    },
+  ],
+  "robert|the catcher in the rye|started_reading": [
+    {
+      author: "maya",
+      body: "Catcher in the Rye again? Holden Caulfield is going to ruin your week in the best way",
+      daysAgo: 0,
+      likedBy: ["robert", "jordan"],
+    },
+    {
+      author: "robert",
+      body: "first reread since high school — the phonies line hits different now",
+      daysAgo: 0,
+      likedBy: ["maya", "sam"],
+    },
+    {
+      author: "sam",
+      body: "report back when you get to the museum scene. still destroys me",
+      daysAgo: 0,
+      likedBy: ["robert", "maya"],
     },
   ],
   "robert|pachinko|reviewed": [
