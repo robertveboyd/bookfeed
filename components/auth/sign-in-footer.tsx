@@ -22,7 +22,7 @@ export function SignInFooter() {
     <>
       Don&apos;t have an account?{" "}
       {/* Closed-beta gate — remove at public launch */}
-      {true ? (
+      {process.env.NODE_ENV === "production" ? (
         <>
           <button
             type="button"
