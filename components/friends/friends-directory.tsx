@@ -1,4 +1,5 @@
 import { FriendshipList } from "@/components/friends/friends-lists"
+import { SectionHeading } from "@/components/friends/section-heading"
 import { requireSession } from "@/lib/auth/util/session"
 import {
   getCurrentlyReadingByUserIds,
@@ -23,6 +24,22 @@ export async function FriendsDirectory() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-10">
+      {/* Requests are the only actionable section, so they lead. */}
+      {incoming.length > 0 ? (
+        <section className="border-border/70 bg-muted/30 space-y-4 rounded-xl border p-4 sm:p-5">
+          <SectionHeading title="Incoming requests" count={incoming.length} />
+          <FriendshipList
+            items={incoming}
+            mode="incoming"
+            empty={{
+              title: "No incoming requests",
+              description:
+                "When someone sends you a friend request, it will show up here.",
+            }}
+          />
+        </section>
+      ) : null}
+
       <section
         className={
           directoryEmpty
@@ -30,7 +47,7 @@ export async function FriendsDirectory() {
             : "space-y-4"
         }
       >
-        <h2 className="text-lg font-medium tracking-tight">Your friends</h2>
+        <SectionHeading title="Your friends" count={friends.length} />
         <FriendshipList
           items={friends}
           mode="friends"
@@ -44,28 +61,9 @@ export async function FriendsDirectory() {
         />
       </section>
 
-      {incoming.length > 0 ? (
-        <section className="space-y-4">
-          <h2 className="text-lg font-medium tracking-tight">
-            Incoming requests
-          </h2>
-          <FriendshipList
-            items={incoming}
-            mode="incoming"
-            empty={{
-              title: "No incoming requests",
-              description:
-                "When someone sends you a friend request, it will show up here.",
-            }}
-          />
-        </section>
-      ) : null}
-
       {outgoing.length > 0 ? (
         <section className="space-y-4">
-          <h2 className="text-lg font-medium tracking-tight">
-            Sent requests
-          </h2>
+          <SectionHeading title="Sent requests" count={outgoing.length} />
           <FriendshipList
             items={outgoing}
             mode="outgoing"

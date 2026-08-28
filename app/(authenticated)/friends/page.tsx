@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { FriendsSearchHitsFallback } from "@/components/friends/friends-directory-fallback"
 import { FriendsSearch } from "@/components/friends/friends-search"
 import { FriendsSearchHits } from "@/components/friends/friends-search-hits"
+import { SectionHeading } from "@/components/friends/section-heading"
 
 export const metadata: Metadata = {
   title: "Friends",
@@ -19,7 +20,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-medium tracking-tight">Find friends</h2>
+      <SectionHeading title="Find friends" />
       <FriendsSearch defaultQuery={query} />
       {query.length >= 2 ? (
         <Suspense fallback={<FriendsSearchHitsFallback />} key={query}>

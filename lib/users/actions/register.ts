@@ -26,14 +26,6 @@ export async function register(
   _prevState: RegisterState,
   formData: FormData,
 ): Promise<RegisterState> {
-  // Closed-beta gate — remove at public launch.
-  if (process.env.NODE_ENV === "production") {
-    return {
-      message:
-        "Registration is closed during our beta. We'll open to the public soon.",
-    }
-  }
-
   const email = normalizeEmail(String(formData.get("email") ?? ""))
   const username = normalizeUsername(String(formData.get("username") ?? ""))
   const password = String(formData.get("password") ?? "")

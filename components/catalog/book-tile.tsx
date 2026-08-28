@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { BookCover } from "@/components/catalog/book-cover"
 import { BookTileStatusMenu } from "@/components/catalog/book-tile-status-menu"
+import { StarRatingDisplay } from "@/components/reviews/star-rating"
 import type { BookTile as BookTileData } from "@/lib/books/types"
 import type { LibraryStatus } from "@/lib/library/types"
 import { cn } from "@/lib/utils"
@@ -19,6 +20,9 @@ type BookTileProps = {
   /** When set with showStatusMenu, seeds the catalog status control */
   libraryStatus?: LibraryStatus | null
   showStatusMenu?: boolean
+  /** Shows the library owner's own stars in place of the catalog average */
+  showOwnRating?: boolean
+  ownRating?: number | null
 }
 
 export function BookTile({
@@ -27,6 +31,8 @@ export function BookTile({
   className,
   libraryStatus = null,
   showStatusMenu = false,
+  showOwnRating = false,
+  ownRating = null,
 }: BookTileProps) {
   const authorsLabel = book.authors.join(", ")
   const href = `/books/${book.id}`
@@ -71,7 +77,13 @@ export function BookTile({
             {authorsLabel}
           </p>
         ) : null}
-        {book.rating && book.rating.count > 0 ? (
+        {showOwnRating ? (
+          ownRating ? (
+            <StarRatingDisplay rating={ownRating} />
+          ) : (
+            <p className="text-muted-foreground/70 text-xs">Not rated</p>
+          )
+        ) : book.rating && book.rating.count > 0 ? (
           <p
             className="flex items-center gap-1 text-xs tabular-nums"
             aria-label={`${book.rating.average.toFixed(1)} out of 5 from ${book.rating.count} ${book.rating.count === 1 ? "rating" : "ratings"}`}

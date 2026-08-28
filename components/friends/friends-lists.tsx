@@ -11,23 +11,25 @@ import type {
 } from "@/lib/friends/types"
 import { cn } from "@/lib/utils"
 
-const peopleGridClass =
+export const peopleGridClass =
   "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
 
 function PersonCard({
   user,
   actions,
+  cornerAction,
   reading,
+  showReadingLine = false,
   showHoverPreview = false,
 }: {
   user: { id: string; username: string; image: string | null }
-  actions: ReactNode
+  actions?: ReactNode
+  /** Quiet action pinned to the card corner, revealed on hover */
+  cornerAction?: ReactNode
   reading?: CurrentlyReadingBook | null
+  showReadingLine?: boolean
   showHoverPreview?: boolean
 }) {
-  const profileLinkClass =
-    "flex w-full min-w-0 flex-col items-center gap-2 hover:opacity-90"
-
   const profileContent = (
     <>
       <UserAvatarWithReadingBadge
@@ -40,15 +42,23 @@ function PersonCard({
       <span className="w-full truncate text-center text-sm font-medium">
         @{user.username}
       </span>
+      {showReadingLine ? (
+        <span className="text-muted-foreground line-clamp-1 min-h-4 w-full text-center text-xs">
+          {reading?.title ?? ""}
+        </span>
+      ) : null}
     </>
   )
 
   return (
-    <li className="flex flex-col items-center gap-3 rounded-xl border border-border/80 px-3 py-4">
+    <li className="group/person border-border/70 bg-muted/20 hover:border-border hover:bg-muted/40 relative flex flex-col items-center gap-3 rounded-xl border px-3 py-4 transition-colors">
+      {cornerAction ? (
+        <div className="absolute top-1.5 right-1.5 z-10">{cornerAction}</div>
+      ) : null}
       <FriendHoverCard
         user={user}
         enabled={showHoverPreview}
-        className={profileLinkClass}
+        className="flex w-full min-w-0 flex-col items-center gap-1.5 rounded-lg outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring"
       >
         {profileContent}
       </FriendHoverCard>
@@ -130,21 +140,27 @@ export function FriendshipList({
               ? "incoming_pending"
               : "outgoing_pending"
 
+        const friendshipActions = (
+          <FriendshipActions
+            userId={user.id}
+            username={user.username}
+            relation={relation}
+            friendshipId={friendship.id}
+            align="center"
+            compact={mode === "friends"}
+          />
+        )
+
         return (
           <PersonCard
             key={friendship.id}
             user={user}
             reading={readingByUserId?.get(user.id)}
+            showReadingLine={mode === "friends"}
             showHoverPreview={mode === "friends"}
-            actions={
-              <FriendshipActions
-                userId={user.id}
-                username={user.username}
-                relation={relation}
-                friendshipId={friendship.id}
-                align="center"
-              />
-            }
+            // Unfriend is a rare, destructive action — keep it out of the way.
+            cornerAction={mode === "friends" ? friendshipActions : undefined}
+            actions={mode === "friends" ? undefined : friendshipActions}
           />
         )
       })}

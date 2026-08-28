@@ -155,11 +155,13 @@ function LibraryGridSection({
   description,
   entries,
   tileSize = "md",
+  showOwnRating = false,
 }: {
   title: string
   description?: string
   entries: LibraryEntryTile[]
   tileSize?: "sm" | "md"
+  showOwnRating?: boolean
 }) {
   return (
     <section className="space-y-4">
@@ -175,11 +177,36 @@ function LibraryGridSection({
             className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 motion-reduce:animate-none"
             style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
           >
-            <BookTile book={entry.book} size={tileSize} />
+            <BookTile
+              book={entry.book}
+              size={tileSize}
+              showOwnRating={showOwnRating}
+              ownRating={entry.rating}
+            />
           </div>
         ))}
       </div>
     </section>
+  )
+}
+
+function LibraryStats({ readCount }: { readCount: number }) {
+  if (readCount === 0) {
+    return (
+      <p className="text-muted-foreground text-sm">
+        What you&apos;re reading, what you&apos;ve finished, and what&apos;s
+        next.
+      </p>
+    )
+  }
+
+  return (
+    <p className="text-muted-foreground text-sm">
+      <span className="text-foreground font-medium tabular-nums">
+        {readCount}
+      </span>{" "}
+      {readCount === 1 ? "book read" : "books read"}
+    </p>
   )
 }
 
@@ -195,10 +222,7 @@ export function LibraryView({ lists, topBooks }: LibraryViewProps) {
     <div className="space-y-12">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Your library</h1>
-        <p className="text-muted-foreground text-sm">
-          What you&apos;re reading, what you&apos;ve finished, and what&apos;s
-          next.
-        </p>
+        <LibraryStats readCount={lists.read.length} />
       </div>
 
       <CurrentlyReading entry={lists.reading} />
@@ -212,6 +236,7 @@ export function LibraryView({ lists, topBooks }: LibraryViewProps) {
           title="Read"
           description="Books you've finished"
           entries={lists.read}
+          showOwnRating
         />
       ) : null}
 

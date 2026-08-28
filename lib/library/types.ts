@@ -19,6 +19,8 @@ export type LibraryBook = BookTile & {
 /** Entry + tile fields for /library lists */
 export type LibraryEntryTile = LibraryEntry & {
   book: LibraryBook
+  /** Rating the library owner gave this book; null when they haven't reviewed it. */
+  rating: number | null
 }
 
 export type LibraryLists = {

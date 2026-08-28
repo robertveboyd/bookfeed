@@ -70,6 +70,7 @@ async function getReadingTile(
       description: book.description,
       publishYear: book.publishYear,
     },
+    rating: null,
   }
 }
 

@@ -4,7 +4,7 @@ import { z } from "zod"
 import { authorsForBookIds } from "@/lib/books/queries"
 import { isGenre } from "@/lib/books/types"
 import { db } from "@/lib/db"
-import { books, libraryEntries } from "@/lib/db/schema"
+import { books, libraryEntries, reviews } from "@/lib/db/schema"
 import type {
   LibraryBook,
   LibraryEntry,
@@ -94,9 +94,17 @@ export async function listLibrary(userId: string): Promise<LibraryLists> {
       genre: books.genre,
       description: books.description,
       publishYear: books.publishYear,
+      rating: reviews.rating,
     })
     .from(libraryEntries)
     .innerJoin(books, eq(books.id, libraryEntries.bookId))
+    .leftJoin(
+      reviews,
+      and(
+        eq(reviews.bookId, libraryEntries.bookId),
+        eq(reviews.userId, userId),
+      ),
+    )
     .where(eq(libraryEntries.userId, userId))
     .orderBy(desc(libraryEntries.updatedAt), asc(books.title))
 
@@ -119,6 +127,7 @@ export async function listLibrary(userId: string): Promise<LibraryLists> {
       status: row.status,
       updatedAt: row.updatedAt,
       book,
+      rating: row.rating,
     }
   })
 

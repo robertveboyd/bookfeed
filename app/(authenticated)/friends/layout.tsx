@@ -9,7 +9,7 @@ export default function FriendsLayout({ children }: { children: ReactNode }) {
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">Friends</h1>
         <p className="text-muted-foreground text-sm">
-          Find people by username and manage friend requests.
+          See what your friends are reading, and find more people to follow.
         </p>
       </div>
 

@@ -1,5 +1,6 @@
 "use client"
 
+import { UserMinusIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 
@@ -30,6 +31,8 @@ type FriendshipActionsProps = {
   /** Stretch actions to container width (profile header on mobile). */
   fullWidth?: boolean
   align?: "end" | "center"
+  /** Renders unfriend as a quiet icon button — for dense friend grids. */
+  compact?: boolean
 }
 
 export function FriendshipActions({
@@ -40,6 +43,7 @@ export function FriendshipActions({
   size = "sm",
   fullWidth = false,
   align = "end",
+  compact = false,
 }: FriendshipActionsProps) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -60,6 +64,63 @@ export function FriendshipActions({
   }
 
   const isCentered = align === "center"
+
+  const unfriendDialog = (
+    <Dialog
+      open={confirmUnfriend}
+      onOpenChange={(open) => {
+        if (!open && !pending) setConfirmUnfriend(false)
+      }}
+    >
+      <DialogContent showCloseButton={!pending}>
+        <DialogHeader>
+          <DialogTitle>Unfriend @{username}?</DialogTitle>
+          <DialogDescription>
+            You&rsquo;ll need to send a new request to become friends again.
+          </DialogDescription>
+        </DialogHeader>
+        {error ? <p className="text-destructive text-sm">{error}</p> : null}
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending}
+            onClick={() => setConfirmUnfriend(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={pending}
+            onClick={() => run(() => unfriend({ userId }))}
+          >
+            Unfriend
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+
+  if (compact && relation === "friends") {
+    return (
+      <>
+        <Button
+          type="button"
+          size="icon-sm"
+          variant="ghost"
+          disabled={pending}
+          aria-label={`Unfriend @${username}`}
+          title={`Unfriend @${username}`}
+          className="text-muted-foreground hover:text-foreground opacity-100 transition-opacity sm:opacity-0 sm:group-hover/person:opacity-100 sm:focus-visible:opacity-100"
+          onClick={() => setConfirmUnfriend(true)}
+        >
+          <UserMinusIcon />
+        </Button>
+        {unfriendDialog}
+      </>
+    )
+  }
 
   return (
     <div
@@ -144,41 +205,11 @@ export function FriendshipActions({
         ) : null}
       </div>
 
-      {error ? <p className="text-destructive text-xs">{error}</p> : null}
+      {error && !confirmUnfriend ? (
+        <p className="text-destructive text-xs">{error}</p>
+      ) : null}
 
-      <Dialog
-        open={confirmUnfriend}
-        onOpenChange={(open) => {
-          if (!open && !pending) setConfirmUnfriend(false)
-        }}
-      >
-        <DialogContent showCloseButton={!pending}>
-          <DialogHeader>
-            <DialogTitle>Unfriend @{username}?</DialogTitle>
-            <DialogDescription>
-              You’ll need to send a new request to become friends again.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={pending}
-              onClick={() => setConfirmUnfriend(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={pending}
-              onClick={() => run(() => unfriend({ userId }))}
-            >
-              Unfriend
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {unfriendDialog}
     </div>
   )
 }
