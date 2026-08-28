@@ -1,8 +1,6 @@
-import Link from "next/link"
-
-import { BookCover } from "@/components/catalog/book-cover"
 import { BookTile } from "@/components/catalog/book-tile"
 import { FriendshipActions } from "@/components/friends/friendship-actions"
+import { CurrentlyReadingCard } from "@/components/library/currently-reading-card"
 import { UserAvatar } from "@/components/profile/user-avatar"
 import { EmptyState } from "@/components/ui/empty-state"
 import { HorizontalScroller } from "@/components/ui/horizontal-scroller"
@@ -19,44 +17,6 @@ type UserProfileViewProps = {
   lists: Pick<LibraryLists, "reading"> &
     Partial<Pick<LibraryLists, "read" | "interested">>
   topBooks: TopBookSlot[]
-}
-
-function ProfileCurrentlyReading({ entry }: { entry: LibraryEntryTile }) {
-  const { book } = entry
-  const authorsLabel = book.authors.join(", ")
-
-  return (
-    <section className="space-y-3 sm:space-y-4">
-      <h2 className="text-base font-semibold tracking-tight sm:text-lg">
-        Currently reading
-      </h2>
-      <div className="flex gap-3 sm:gap-6">
-        <Link
-          href={`/books/${book.id}`}
-          className="relative aspect-[2/3] w-24 shrink-0 overflow-hidden rounded-md bg-muted shadow-sm touch-manipulation sm:w-32"
-        >
-          <BookCover
-            coverImageId={book.coverImageId}
-            title={book.title}
-            size="L"
-          />
-        </Link>
-        <div className="min-w-0 space-y-1 self-center">
-          <h3 className="text-lg font-semibold tracking-tight text-balance sm:text-xl">
-            <Link
-              href={`/books/${book.id}`}
-              className="hover:underline underline-offset-4"
-            >
-              {book.title}
-            </Link>
-          </h3>
-          {authorsLabel ? (
-            <p className="text-muted-foreground text-sm">{authorsLabel}</p>
-          ) : null}
-        </div>
-      </div>
-    </section>
-  )
 }
 
 function ProfileTopBooks({ slots }: { slots: TopBookSlot[] }) {
@@ -149,7 +109,7 @@ export function UserProfileView({
       : !hasReading
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-8 sm:gap-10">
+    <div className="flex flex-col gap-8 sm:gap-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <UserAvatar
@@ -199,7 +159,7 @@ export function UserProfileView({
       ) : (
         <>
           {hasReading ? (
-            <ProfileCurrentlyReading entry={lists.reading!} />
+            <CurrentlyReadingCard entry={lists.reading!} />
           ) : null}
 
           {mode === "friend" ? (

@@ -1,7 +1,7 @@
 export default function Loading() {
   return (
     <div
-      className="mx-auto max-w-4xl space-y-8 sm:space-y-10"
+      className="space-y-8 sm:space-y-10"
       aria-busy="true"
       aria-label="Loading profile"
     >
