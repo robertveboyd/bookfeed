@@ -1,5 +1,6 @@
 "use client"
 
+import { StarIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useTransition } from "react"
 
@@ -35,12 +36,20 @@ export function BookCommunityRating({
   if (stats.count === 0) return null
 
   return (
-    <p className={cn("text-muted-foreground text-sm", className)}>
-      <span className="text-foreground font-medium">
-        {formatAverage(stats.average)}
+    <p
+      className={cn(
+        "text-muted-foreground flex items-center gap-1.5 text-sm",
+        className,
+      )}
+    >
+      <StarIcon className="text-foreground size-3.5 fill-current" aria-hidden />
+      <span>
+        <span className="text-foreground font-medium">
+          {formatAverage(stats.average)}
+        </span>
+        {" · "}
+        {stats.count} {stats.count === 1 ? "rating" : "ratings"}
       </span>
-      {" · "}
-      {stats.count} {stats.count === 1 ? "rating" : "ratings"}
     </p>
   )
 }
@@ -113,13 +122,7 @@ export function BookReviewForm({
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg font-medium tracking-tight">{heading}</h2>
         {stats.count > 0 ? (
-          <p className="text-muted-foreground text-sm">
-            <span className="text-foreground font-medium">
-              {formatAverage(stats.average)}
-            </span>
-            {" · "}
-            {stats.count} {stats.count === 1 ? "rating" : "ratings"}
-          </p>
+          <BookCommunityRating stats={stats} />
         ) : (
           <p className="text-muted-foreground text-sm">Be the first to rate</p>
         )}

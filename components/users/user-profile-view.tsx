@@ -57,10 +57,12 @@ function ProfileGrid({
   title,
   entries,
   tileSize = "md",
+  showOwnRating = false,
 }: {
   title: string
   entries: LibraryEntryTile[]
   tileSize?: "sm" | "md"
+  showOwnRating?: boolean
 }) {
   return (
     <section className="space-y-3 sm:space-y-4">
@@ -74,14 +76,25 @@ function ProfileGrid({
         <HorizontalScroller bleed aria-label={title}>
           {entries.map((entry) => (
             <div key={entry.id} role="listitem" className="shrink-0">
-              <BookTile book={entry.book} size="sm" />
+              <BookTile
+                book={entry.book}
+                size="sm"
+                showOwnRating={showOwnRating}
+                ownRating={entry.rating}
+              />
             </div>
           ))}
         </HorizontalScroller>
       </div>
       <div className="hidden flex-wrap gap-x-3 gap-y-5 sm:flex sm:gap-x-4 sm:gap-y-6">
         {entries.map((entry) => (
-          <BookTile key={entry.id} book={entry.book} size={tileSize} />
+          <BookTile
+            key={entry.id}
+            book={entry.book}
+            size={tileSize}
+            showOwnRating={showOwnRating}
+            ownRating={entry.rating}
+          />
         ))}
       </div>
     </section>
@@ -166,7 +179,7 @@ export function UserProfileView({
             <>
               {hasTopBooks ? <ProfileTopBooks slots={topBooks} /> : null}
               {read.length > 0 ? (
-                <ProfileGrid title="Read" entries={read} />
+                <ProfileGrid title="Read" entries={read} showOwnRating />
               ) : null}
               {interested.length > 0 ? (
                 <ProfileGrid

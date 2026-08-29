@@ -80,9 +80,7 @@ export function BookTile({
         {showOwnRating ? (
           ownRating ? (
             <StarRatingDisplay rating={ownRating} />
-          ) : (
-            <p className="text-muted-foreground/70 text-xs">Not rated</p>
-          )
+          ) : null
         ) : book.rating && book.rating.count > 0 ? (
           <p
             className="flex items-center gap-1 text-xs tabular-nums"
